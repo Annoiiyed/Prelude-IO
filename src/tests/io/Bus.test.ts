@@ -8,37 +8,13 @@ describe("io.Bus", () => {
       .fn()
       .mockImplementation((n) => Either.right(n * 2));
 
-    const double = io.Bus.create<number, number>("test", dummyValidator);
+    const double = io.Bus.create<number, number>(dummyValidator, "test");
 
     const tripleChainedBus = double.chain(double).chain(double);
 
     expect((await tripleChainedBus.decode(1)).getOrThrow()).toEqual(8);
 
     expect(dummyValidator).toHaveBeenCalledTimes(3);
-  });
-
-  it("correctly merges names of combined busses", () => {
-    const dummyValidator: io.IODecode<number, number> = (input) =>
-      Either.right(input);
-
-    const bus1 = io.Bus.create<number, number>("bus1", dummyValidator);
-    const bus2 = io.Bus.create<number, number>("bus2", dummyValidator);
-
-    const bus3 = bus1.else(bus2);
-
-    expect(bus3.name).toBe("bus1 || bus2");
-
-    const bus4 = bus3.chain(bus2);
-
-    expect(bus4.name).toBe("(bus1 || bus2) -> bus2");
-
-    const bus5 = bus2.chain(bus1, "testAlias");
-
-    expect(bus5.name).toBe("testAlias");
-
-    const bus6 = bus5.chain(bus3);
-
-    expect(bus6.name).toBe("testAlias -> (bus1 || bus2)");
   });
 
   it("correctly merges errors of combined busses", async () => {
@@ -57,13 +33,13 @@ describe("io.Bus", () => {
           ) as IOResult<number>);
 
     const mustBeTwo = io.Bus.create<number, number>(
-      "mustBeTwo",
-      mustBeTwoValidator
+      mustBeTwoValidator,
+      "mustBeTwo"
     );
 
     const mustBeThree = io.Bus.create<number, number>(
-      "mustBeThree",
-      mustBeThreeValidator
+      mustBeThreeValidator,
+      "mustBeThree"
     );
 
     expect(await mustBeTwo.decode(2)).toEqual(Either.right(2));

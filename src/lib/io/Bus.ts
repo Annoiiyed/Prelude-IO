@@ -1,33 +1,6 @@
-import { Tuple2, Vector } from "prelude-ts";
+import { Vector } from "prelude-ts";
 import { IODecode, IOAsyncDecode, IOLeft } from "./types";
-
-const operatorRegex = /(\|\||->)/g;
-
-/**
- * Wraps a name in parentheses if it contains an operator.
- * Might need improvements in the future regarding presedence and pre-wrapped names.
- *
- * @param {string} name The name to check for operators
- * @returns {string} The name wrapped in parentheses if it contains an operator
- */
-const maybeWrap = (name: string): string =>
-  operatorRegex.test(name) ? `(${name})` : name;
-
-/**
- * Merges the names using -> or || depending on the mode.
- *
- * Wraps the names in parentheses if they contain an operator.
- *
- * @example mergeNames(["a", "b"], "->") === "a -> b"
- * @example mergeNames(["a", "b -> c"], "||") === "a || (b -> c)"
- *
- * @param {Tuple2<string, string>} names A tuple of names to merge
- * @param {"->" | "||"} mode The mode to use for merging (and/or)
- *
- * @returns {string} The merged names
- */
-export const mergeNames = (names: Tuple2<string, string>, mode: "->" | "||") =>
-  names.toArray().map(maybeWrap).join(` ${mode} `);
+import { mergeNames } from "./utils";
 
 /**
  * Merges the errors of two results. Works for both left and right results.
@@ -76,8 +49,8 @@ export default class Bus<I, O> {
    * @param {InToOut<I, O>} decode decode function for this bus
    */
   static create<I, O>(
-    name: string,
-    decode: IODecode<I, O> | IOAsyncDecode<I, O>
+    decode: IODecode<I, O> | IOAsyncDecode<I, O>,
+    name: string
   ): Bus<I, O> {
     return new Bus(name, async (input: I) => decode(input));
   }
@@ -95,7 +68,7 @@ export default class Bus<I, O> {
    */
   public else<IB, OB>(
     other: Bus<IB, OB>,
-    name: string = mergeNames(Tuple2.of(this.name, other.name), "||")
+    name: string = mergeNames([this.name, other.name], "|")
   ): Bus<I | IB, O | OB> {
     return new Bus<I | IB, O | OB>(name, async (input: I | IB) => {
       const us = await this.decode(input as I);
@@ -123,7 +96,7 @@ export default class Bus<I, O> {
    */
   public chain<OB>(
     other: Bus<O, OB>,
-    name: string = mergeNames(Tuple2.of(this.name, other.name), "->")
+    name: string = mergeNames([this.name, other.name], "->")
   ): Bus<I, OB> {
     return new Bus(name, (input: I) =>
       this.decode(input).then((intermediate) =>
