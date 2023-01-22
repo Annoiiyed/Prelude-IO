@@ -1,10 +1,15 @@
-// import { Vector } from "prelude-ts";
-// import addValidator from "../addValidator";
-// import { Bus } from "../types";
+import Bus from "../Bus";
+import { IOAccept, IOReject } from "../utils";
 
-// import { isNumber } from "../Validators";
-// import { Field } from "./types";
+const name = "number";
 
-// const number_: Bus<number | string, number>;
-
-// export default number_;
+export default Bus.create<unknown, number>(
+  (input) =>
+    typeof input === "number"
+      ? IOAccept(input)
+      : IOReject({
+          condition: name,
+          value: input,
+        }),
+  name
+);

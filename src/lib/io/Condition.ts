@@ -78,18 +78,16 @@ export default class Condition<I> {
    *
    * @returns {Condition<I>}
    */
-  public or(
-    other: Condition<I>,
+  public or<OI>(
+    other: Condition<OI>,
     name: string = mergeNames([this.name, other.name], "OR")
   ): Condition<I> {
-    return new Condition<I>(name, async (input: I) =>
-      // eslint-disable-next-line prettier/prettier
-      Promise
-        .all([this.check(input), other.check(input)])
-        .then(([us, them]) =>
-        us.isNone() || them.isNone()
-          ? Option.none()
-          : mergeErrors(us, them, makeIOError(name, input))
+    return new Condition<I>(name, async (input: I | OI) =>
+      Promise.all([this.check(input as I), other.check(input as OI)]).then(
+        ([us, them]) =>
+          us.isNone() || them.isNone()
+            ? Option.none()
+            : mergeErrors(us, them, makeIOError(name, input))
       )
     );
   }
