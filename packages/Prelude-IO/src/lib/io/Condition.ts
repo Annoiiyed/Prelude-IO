@@ -7,7 +7,7 @@ const makeIOError = (condition: string, value: unknown): IOError => ({
   value,
 });
 
-export const mergeErrors = (
+const mergeErrors = (
   us: Option<IOErrors>,
   them: Option<IOErrors>,
   combined: IOError
@@ -27,7 +27,7 @@ export const mergeErrors = (
  *
  * @typedef {unknown} I Input
  */
-export class Condition<I> {
+export default class Condition<I> {
   private constructor(
     public readonly name: string,
     public readonly check: (input: I) => Promise<Option<IOErrors>>
@@ -100,7 +100,7 @@ export class Condition<I> {
   public not(name = `!${maybeWrapName(this.name)}`): Condition<I> {
     return new Condition<I>(name, async (input: I) =>
       (await this.check(input)).isNone()
-        ? Option.some(Vector.of(makeIOError(this.name, input)))
+        ? Option.some(Vector.of(makeIOError(name, input)))
         : Option.none()
     );
   }

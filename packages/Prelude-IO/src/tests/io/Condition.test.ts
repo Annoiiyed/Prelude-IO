@@ -1,15 +1,14 @@
 import { Option, Vector } from "prelude-ts";
-import { Condition } from "../../lib/io/Condition";
-import { IOErrors } from "../../lib/io/types";
+import * as io from "../..";
 
 describe("io.Condition", () => {
   it("executes .and() conditions", async () => {
-    const canDivideByThree = Condition.create(
+    const canDivideByThree = io.Condition.create(
       "canDivideByThree",
       (n: number) => n % 3 === 0
     );
 
-    const canDivideByFive = Condition.create(
+    const canDivideByFive = io.Condition.create(
       "canDivideByFive",
       (n: number) => n % 5 === 0
     );
@@ -21,7 +20,7 @@ describe("io.Condition", () => {
 
     expect(await canDivideByThree.check(15)).toEqual(Option.none());
 
-    expect(await multipleOfFifteen.check(3)).toEqual<Option<IOErrors>>(
+    expect(await multipleOfFifteen.check(3)).toEqual<Option<io.IOErrors>>(
       Option.of(
         Vector.of({
           condition: "multipleOfFifteen",
@@ -31,7 +30,7 @@ describe("io.Condition", () => {
       )
     );
 
-    expect(await multipleOfFifteen.check(4)).toEqual<Option<IOErrors>>(
+    expect(await multipleOfFifteen.check(4)).toEqual<Option<io.IOErrors>>(
       Option.of(
         Vector.of({
           condition: "multipleOfFifteen",
@@ -49,12 +48,12 @@ describe("io.Condition", () => {
   });
 
   it("executes .or() conditions", async () => {
-    const canDivideByThree = Condition.create(
+    const canDivideByThree = io.Condition.create(
       "canDivideByThree",
       (n: number) => n % 3 === 0
     );
 
-    const canDivideByFive = Condition.create(
+    const canDivideByFive = io.Condition.create(
       "canDivideByFive",
       (n: number) => n % 5 === 0
     );
@@ -91,7 +90,7 @@ describe("io.Condition", () => {
   });
 
   it("can be inverted", async () => {
-    const isEven = Condition.create("isEven", (n: number) => n % 2 === 0);
+    const isEven = io.Condition.create("isEven", (n: number) => n % 2 === 0);
     const isOdd = isEven.not();
 
     expect(await isEven.check(2)).toEqual(Option.none());
