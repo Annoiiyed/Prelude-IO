@@ -1,3 +1,6 @@
+import { Either, Vector } from "prelude-ts";
+import { IOError, IOErrors, IOLeft, IORight } from "./types";
+
 const operators = ["AND", "OR", "->", "|"];
 
 /**
@@ -28,3 +31,21 @@ export const maybeWrapName = (name: string) =>
  */
 export const mergeNames = (names: [string, string], operator: string) =>
   names.map(maybeWrapName).join(` ${operator} `);
+
+/**
+ * Shorthand function for creating a right Either for IOResult.
+ *
+ * @param {O} output
+ *
+ * @returns {IORight<O>}
+ */
+export const IOAccept = <O>(output: O) => Either.right(output) as IORight<O>;
+
+/**
+ * Shorthand function for creating a left Either for IOResult.
+ *
+ *
+ * @returns {IOLeft}
+ */
+export const IOReject = (error: IOErrors | IOError) =>
+  Either.left(error instanceof Vector ? error : Vector.of(error)) as IOLeft;

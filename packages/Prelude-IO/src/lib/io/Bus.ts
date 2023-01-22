@@ -1,4 +1,4 @@
-import { Either, Vector } from "prelude-ts";
+import { Either, Option, Vector } from "prelude-ts";
 import { IODecode, IOAsyncDecode, IOLeft } from "./types";
 import { mergeNames } from "./utils";
 import Condition from "./Condition";
@@ -38,6 +38,7 @@ const mergeLeft = (us: IOLeft, them: IOLeft) =>
 export default class Bus<I, O> {
   private constructor(
     public readonly name: string,
+    public readonly condition: Option<Condition<O>>,
     public readonly decode: IOAsyncDecode<I, O>
   ) {
     Object.freeze(this);
@@ -53,7 +54,7 @@ export default class Bus<I, O> {
     decode: IODecode<I, O> | IOAsyncDecode<I, O>,
     name: string
   ): Bus<I, O> {
-    return new Bus(name, async (input: I) => decode(input));
+    return new Bus(name, Option.none(), async (input: I) => decode(input));
   }
 
   /**
@@ -71,21 +72,27 @@ export default class Bus<I, O> {
     other: Bus<IB, OB>,
     name: string = mergeNames([this.name, other.name], "|")
   ): Bus<I | IB, O | OB> {
-    return new Bus<I | IB, O | OB>(name, async (input: I | IB) => {
-      const us = await this.decode(input as I);
+    return new Bus<I | IB, O | OB>(
+      name,
+      this.condition.map((c) =>
+        other.condition.isNone() ? c : c.or(other.condition.get())
+      ) as Option<Condition<O | OB>>,
+      async (input: I | IB) => {
+        const us = await this.decode(input as I);
 
-      if (us.isRight()) {
-        return us;
+        if (us.isRight()) {
+          return us;
+        }
+
+        const them = await other.decode(input as IB);
+
+        if (them.isRight()) {
+          return them;
+        }
+
+        return mergeLeft(us, them);
       }
-
-      const them = await other.decode(input as IB);
-
-      if (them.isRight()) {
-        return them;
-      }
-
-      return mergeLeft(us, them);
-    });
+    );
   }
 
   /**
@@ -102,7 +109,7 @@ export default class Bus<I, O> {
     other: Bus<O, OB>,
     name: string = mergeNames([this.name, other.name], "->")
   ): Bus<I, OB> {
-    return new Bus(name, (input: I) =>
+    return new Bus(name, other.condition, (input: I) =>
       this.decode(input).then((intermediate) =>
         intermediate.isLeft() ? intermediate : other.decode(intermediate.get())
       )
@@ -121,7 +128,7 @@ export default class Bus<I, O> {
     condition: Condition<O>,
     name = `${condition.name}(${this.name})`
   ): Bus<I, O> {
-    return new Bus(name, async (input: I) => {
+    return new Bus(name, Option.of(condition), async (input: I) => {
       const decodingResult = await this.decode(input);
 
       if (decodingResult.isLeft()) {
