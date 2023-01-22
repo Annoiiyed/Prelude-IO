@@ -7,7 +7,7 @@ const operators = ["AND", "OR", "->", "|"];
  * @param {string} name The name to check for operators
  * @returns {string} The name wrapped in parentheses if it contains an operator
  */
-const maybeWrap = (name: string) =>
+export const maybeWrapName = (name: string) =>
   operators.some((operator) => name.includes(operator)) &&
   (!name.startsWith("(") || !name.endsWith(")"))
     ? `(${name})`
@@ -27,4 +27,4 @@ const maybeWrap = (name: string) =>
  * @returns {string} The merged names
  */
 export const mergeNames = (names: [string, string], operator: string) =>
-  names.map(maybeWrap).join(` ${operator} `);
+  names.map(maybeWrapName).join(` ${operator} `);
