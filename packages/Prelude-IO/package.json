@@ -37,7 +37,6 @@
     "typescript": "~4.9.4"
   },
   "dependencies": {
-    "prelude-ts": "~1.0.6",
-    "reflect-metadata": "^0.1.13"
+    "prelude-ts": "~1.0.6"
   }
 }

@@ -1,5 +1,4 @@
-import "reflect-metadata";
-
 export * as Validators from "./lib/io/Validators";
-export * from "./lib/io/Fields";
-export { default as IO } from "./lib/io/IO";
+// export * from "./lib/io/Presets";
+export * from "./lib/io/types";
+export { default as Bus } from "./lib/io/Bus";
