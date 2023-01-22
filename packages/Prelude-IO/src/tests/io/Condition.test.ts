@@ -89,4 +89,12 @@ describe("io.Condition", () => {
       )
     );
   });
+
+  it("can be inverted", async () => {
+    const isEven = Condition.create("isEven", (n: number) => n % 2 === 0);
+    const isOdd = isEven.not();
+
+    expect(await isEven.check(2)).toEqual(Option.none());
+    expect(await isOdd.check(3)).toEqual(Option.none());
+  });
 });

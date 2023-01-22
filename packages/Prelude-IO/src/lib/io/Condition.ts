@@ -1,6 +1,6 @@
 import { Option, Vector } from "prelude-ts";
 import { IOCondition, IOError, IOErrors } from "./types";
-import { mergeNames } from "./utils";
+import { maybeWrapName, mergeNames } from "./utils";
 
 const makeIOError = (condition: string, value: unknown): IOError => ({
   condition,
@@ -91,6 +91,17 @@ export class Condition<I> {
           ? Option.none()
           : mergeErrors(us, them, makeIOError(name, input))
       )
+    );
+  }
+
+  /**
+   * Creates a new condition that is the inverse of this condition.
+   */
+  public not(name = `!${maybeWrapName(this.name)}`): Condition<I> {
+    return new Condition<I>(name, async (input: I) =>
+      (await this.check(input)).isNone()
+        ? Option.some(Vector.of(makeIOError(this.name, input)))
+        : Option.none()
     );
   }
 }
