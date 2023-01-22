@@ -1,6 +1,7 @@
-import { Vector } from "prelude-ts";
+import { Either, Vector } from "prelude-ts";
 import { IODecode, IOAsyncDecode, IOLeft } from "./types";
 import { mergeNames } from "./utils";
+import Condition from "./Condition";
 
 /**
  * Merges the errors of two results. Works for both left and right results.
@@ -10,7 +11,7 @@ import { mergeNames } from "./utils";
  *
  * @returns {IOLeft} A result containing the errors of both results (if any)
  */
-export const mergeLeft = (us: IOLeft, them: IOLeft) =>
+const mergeLeft = (us: IOLeft, them: IOLeft) =>
   us.mapLeft((usErrors) =>
     them.getLeftOrElse(Vector.empty()).appendAll(usErrors)
   ) as IOLeft;
@@ -89,6 +90,9 @@ export default class Bus<I, O> {
 
   /**
    *
+   * Creates a new bus with the given name and bus, returning the
+   * result of the first bus chained into the second bus.
+   *
    * @param {string} name The name of the new bus
    * @param {other} other The other bus to combine with
    *
@@ -103,5 +107,40 @@ export default class Bus<I, O> {
         intermediate.isLeft() ? intermediate : other.decode(intermediate.get())
       )
     );
+  }
+
+  /**
+   * Creates a new bus with a condition attached to it. The condition is applied to the
+   * decoded value of this bus.
+   *
+   * @param {Condition<O>} condition The condition to attach to this bus
+   *
+   * @returns
+   */
+  public if(
+    condition: Condition<O>,
+    name = `${condition.name}(${this.name})`
+  ): Bus<I, O> {
+    return new Bus(name, async (input: I) => {
+      const decodingResult = await this.decode(input);
+
+      if (decodingResult.isLeft()) {
+        return decodingResult;
+      }
+
+      const conditionResult = await condition.check(decodingResult.get());
+
+      if (conditionResult.isNone()) {
+        return decodingResult;
+      }
+
+      return Either.left(
+        Vector.of({
+          condition: name,
+          value: input,
+          branches: conditionResult.get(),
+        })
+      ) as IOLeft;
+    });
   }
 }
