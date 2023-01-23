@@ -1,20 +1,29 @@
-import { Either, Option, Vector } from "prelude-ts";
-import { IODecode, IOAsyncDecode, IOLeft } from "./types";
-import { mergeNames } from "./utils";
-import Condition from "./Condition";
+import { Option, Predicate } from "prelude-ts";
+import { IODecode, IOAsyncDecode } from "./types";
+import { IOReject, mergeNames } from "./utils";
 
 /**
- * Merges the errors of two results. Works for both left and right results.
+ * Merges the predicates of two buses. If both buses have predicates, the predicates are combined with an OR.
  *
- * @param {IOLeft} us The first result
- * @param {IOLeft} them The second result
+ * This widens the input type, which means this might need a `try/catch` block to catch type errors.
  *
- * @returns {IOLeft} A result containing the errors of both results (if any)
+ * @param {Option<Predicate<OA>>} us The first predicate
+ * @param {Option<Predicate<OB>>} them The second predicate
+ *
+ * @returns {Option<Predicate<OA | OB>>} An option that might contain a combined Predicate
  */
-const mergeLeft = (us: IOLeft, them: IOLeft) =>
-  us.mapLeft((usErrors) =>
-    them.getLeftOrElse(Vector.empty()).appendAll(usErrors)
-  ) as IOLeft;
+const mergePredicates = <OA, OB>(
+  us: Option<Predicate<OA>>,
+  them: Option<Predicate<OB>>
+): Option<Predicate<OA | OB>> => {
+  if (us.isNone() && them.isNone()) return Option.none();
+  if (us.isNone()) return them as Option<Predicate<OA | OB>>;
+  if (them.isNone()) return us as Option<Predicate<OA | OB>>;
+
+  return Option.some(
+    (us.get() as Predicate<OA | OB>).or(them.get() as Predicate<OA | OB>)
+  );
+};
 
 /**
  * A bus is a wrapper around a validator that allows for chaining of validators.
@@ -32,13 +41,14 @@ const mergeLeft = (us: IOLeft, them: IOLeft) =>
  * @typeparam I The input type of the bus
  * @typeparam O The output type of the bus
  *
- * @field name The name of the bus
- * @field decode The decode function.
+ * @property {string} name The name of the bus
+ * @property {Option<Predicate<O>>} predicate The predicate of the bus, executed after the decode function
+ * @property {IOAsyncDecode<I, O>} decode The decode function. Always asyncronous
  */
 export default class Bus<I, O> {
   private constructor(
     public readonly name: string,
-    public readonly condition: Option<Condition<O>>,
+    public readonly predicate: Option<Predicate<O>>,
     public readonly decode: IOAsyncDecode<I, O>
   ) {
     Object.freeze(this);
@@ -51,8 +61,8 @@ export default class Bus<I, O> {
    * @param {InToOut<I, O>} decode decode function for this bus
    */
   static create<I, O>(
-    decode: IODecode<I, O> | IOAsyncDecode<I, O>,
-    name: string
+    name: string,
+    decode: IODecode<I, O> | IOAsyncDecode<I, O>
   ): Bus<I, O> {
     return new Bus(name, Option.none(), async (input: I) => decode(input));
   }
@@ -74,9 +84,7 @@ export default class Bus<I, O> {
   ): Bus<I | IB, O | OB> {
     return new Bus<I | IB, O | OB>(
       name,
-      this.condition.map((c) =>
-        other.condition.isNone() ? c : c.or(other.condition.get())
-      ) as Option<Condition<O | OB>>,
+      mergePredicates(this.predicate, other.predicate),
       async (input: I | IB) => {
         const us = await this.decode(input as I);
 
@@ -90,7 +98,11 @@ export default class Bus<I, O> {
           return them;
         }
 
-        return mergeLeft(us, them);
+        return IOReject({
+          condition: name,
+          value: input,
+          branches: us.getLeft().appendAll(them.getLeft()),
+        });
       }
     );
   }
@@ -109,7 +121,7 @@ export default class Bus<I, O> {
     other: Bus<O, OB>,
     name: string = mergeNames([this.name, other.name], "->")
   ): Bus<I, OB> {
-    return new Bus(name, other.condition, (input: I) =>
+    return new Bus(name, other.predicate, (input: I) =>
       this.decode(input).then((intermediate) =>
         intermediate.isLeft() ? intermediate : other.decode(intermediate.get())
       )
@@ -117,37 +129,35 @@ export default class Bus<I, O> {
   }
 
   /**
-   * Creates a new bus with a condition attached to it. The condition is applied to the
+   * Creates a new bus with a predicate attached to it. The predicate is applied to the
    * decoded value of this bus.
    *
-   * @param {Condition<O>} condition The condition to attach to this bus
+    @param {string} name The name of the predicate. Formatted to be "predicateName(busName)"
+   * @param {Predicate<O>} predicate The predicate to attach to this bus
    *
    * @returns
    */
-  public if(
-    condition: Condition<O>,
-    name = `${condition.name}(${this.name})`
-  ): Bus<I, O> {
-    return new Bus(name, Option.of(condition), async (input: I) => {
+  public if(name: string, predicate: Predicate<O>): Bus<I, O> {
+    const newBusName = `${name}(${this.name})`;
+    return new Bus(newBusName, Option.of(predicate), async (input: I) => {
       const decodingResult = await this.decode(input);
 
       if (decodingResult.isLeft()) {
         return decodingResult;
       }
 
-      const conditionResult = await condition.check(decodingResult.get());
-
-      if (conditionResult.isNone()) {
+      if (predicate(decodingResult.get())) {
         return decodingResult;
       }
 
-      return Either.left(
-        Vector.of({
+      return IOReject({
+        condition: newBusName,
+        value: input,
+        branches: IOReject({
           condition: name,
-          value: input,
-          branches: conditionResult.get(),
-        })
-      ) as IOLeft;
+          value: decodingResult.get(),
+        }).getLeft(),
+      });
     });
   }
 }

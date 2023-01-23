@@ -1,6 +1,6 @@
-import Condition from "../Condition";
+import { Predicate } from "prelude-ts";
 import validNumber from "./validNumber";
 
-const isPositive = Condition.create("isPositive", (n: number) => n > 0);
+const isPositive = Predicate.of((n: number) => n > 0);
 
-export default validNumber.if(isPositive, "positiveNumber");
+export default validNumber.if("positiveNumber", isPositive);

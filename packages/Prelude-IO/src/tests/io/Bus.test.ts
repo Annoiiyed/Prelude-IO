@@ -1,44 +1,49 @@
-import { Either, Vector } from "prelude-ts";
+import { Either, Vector, Predicate } from "prelude-ts";
 import * as io from "../..";
 
 describe("io.Bus", () => {
   it("executes all validations in a chain", async () => {
-    const dummyValidator: io.IODecode<number, number> = jest
+    const numberToTwiceThat: io.IODecode<number, number> = jest
       .fn()
       .mockImplementation((n) => Either.right(n * 2));
 
-    const double = io.Bus.create<number, number>(dummyValidator, "test");
+    const double = io.Bus.create<number, number>(
+      "numberToTwiceThat",
+      numberToTwiceThat
+    );
 
     const tripleChainedBus = double.chain(double).chain(double);
 
     expect((await tripleChainedBus.decode(1)).getOrThrow()).toEqual(8);
 
-    expect(dummyValidator).toHaveBeenCalledTimes(3);
+    expect(numberToTwiceThat).toHaveBeenCalledTimes(3);
   });
 
   it("correctly merges errors of combined busses", async () => {
     const mustBeTwoValidator: io.IODecode<number, number> = (input) =>
       input === 2
-        ? Either.right(input)
-        : (Either.left(
-            Vector.of({ message: "wasn't two" })
-          ) as io.IOResult<number>);
+        ? io.IOAccept(input)
+        : io.IOReject({
+            condition: "mustBeTwo",
+            value: input,
+          });
 
     const mustBeThreeValidator: io.IODecode<number, number> = (input) =>
       input === 3
-        ? Either.right(input)
-        : (Either.left(
-            Vector.of({ message: "wasn't three" })
-          ) as io.IOResult<number>);
+        ? io.IOAccept(input)
+        : io.IOReject({
+            condition: "mustBeThree",
+            value: input,
+          });
 
     const mustBeTwo = io.Bus.create<number, number>(
-      mustBeTwoValidator,
-      "mustBeTwo"
+      "mustBeTwo",
+      mustBeTwoValidator
     );
 
     const mustBeThree = io.Bus.create<number, number>(
-      mustBeThreeValidator,
-      "mustBeThree"
+      "mustBeThree",
+      mustBeThreeValidator
     );
 
     expect(await mustBeTwo.decode(2)).toEqual(Either.right(2));
@@ -46,58 +51,58 @@ describe("io.Bus", () => {
     expect(await mustBeThree.decode(3)).toEqual(Either.right(3));
 
     expect(await mustBeThree.decode(2)).toEqual(
-      Either.left(Vector.of({ message: "wasn't three" }))
+      io.IOReject({ condition: "mustBeThree", value: 2 })
     );
 
     const mustBeTwoOrThree = mustBeTwo.else(mustBeThree);
 
     expect(await mustBeTwoOrThree.decode(9)).toEqual(
-      Either.left(
-        Vector.of({ message: "wasn't three" }, { message: "wasn't two" })
-      )
+      io.IOReject({
+        condition: "mustBeTwo | mustBeThree",
+        value: 9,
+        branches: Vector.of(
+          { condition: "mustBeTwo", value: 9 },
+          { condition: "mustBeThree", value: 9 }
+        ),
+      })
     );
   });
 
   it("can be executed conditionally", async () => {
     const stringToNumber = io.Bus.create<string, number>(
-      (input) => Either.right(Number(input)),
-      "stringToNumber"
+      "stringToNumber",
+      (input) => Either.right(Number(input))
     );
-    const isNaN = io.Condition.create("isNaN", Number.isNaN);
-    const isFinite = io.Condition.create("isFinite", Number.isFinite);
-    const stringToValidNumber = stringToNumber.if(
-      isFinite.and(isNaN.not(), "isValidNumber")
-    );
+    const isNaN = Predicate.of<number>(Number.isNaN);
+    const isFinite = Predicate.of(Number.isFinite);
+    const isValid = isNaN.negate().and(isFinite);
+    const stringToValidNumber = stringToNumber.if("isValid", isValid);
 
     expect(await stringToValidNumber.decode("1")).toEqual(Either.right(1));
     expect(await stringToValidNumber.decode("one")).toEqual(
-      Either.left(
-        Vector.of({
-          condition: "isValidNumber(stringToNumber)",
-          value: "one",
-          branches: Vector.of({
-            condition: "isValidNumber",
-            value: NaN,
-            branches: Vector.of(
-              { condition: "isFinite", value: NaN },
-              { condition: "!isNaN", value: NaN }
-            ),
-          }),
-        })
-      ) as io.IOLeft
+      io.IOReject({
+        condition: "isValid(stringToNumber)",
+        value: "one",
+        branches: Vector.of({
+          condition: "isValid",
+          value: NaN,
+        }),
+      })
     );
-    expect(await stringToValidNumber.decode("Infinity")).toEqual(
-      Either.left(
-        Vector.of({
-          condition: "isValidNumber(stringToNumber)",
-          value: "Infinity",
-          branches: Vector.of({
-            condition: "isValidNumber",
-            value: Infinity,
-            branches: Vector.of({ condition: "isFinite", value: Infinity }),
-          }),
-        })
-      ) as io.IOLeft
+
+    const isEven = Predicate.of<number>((n) => n % 2 === 0);
+    const stringToEvenNumber = stringToValidNumber.if("isEven", isEven);
+
+    expect(await stringToEvenNumber.decode("2")).toEqual(Either.right(2));
+    expect(await stringToEvenNumber.decode("3")).toEqual(
+      io.IOReject({
+        condition: "isEven(isValid(stringToNumber))",
+        value: "3",
+        branches: Vector.of({
+          condition: "isEven",
+          value: 3,
+        }),
+      })
     );
   });
 });

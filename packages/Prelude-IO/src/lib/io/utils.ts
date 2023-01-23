@@ -1,7 +1,7 @@
 import { Either, Vector } from "prelude-ts";
-import { IOError, IOErrors, IOLeft, IORight } from "./types";
+import { IOError, IOLeft, IORight } from "./types";
 
-const operators = ["AND", "OR", "->", "|"];
+const operators = ["->", "||"];
 
 /**
  * Wraps a name in parentheses if it contains an operator.
@@ -44,8 +44,9 @@ export const IOAccept = <O>(output: O) => Either.right(output) as IORight<O>;
 /**
  * Shorthand function for creating a left Either for IOResult.
  *
+ * @param {...IOError[]} errors Errors to add to the Either
  *
  * @returns {IOLeft}
  */
-export const IOReject = (error: IOErrors | IOError) =>
-  Either.left(error instanceof Vector ? error : Vector.of(error)) as IOLeft;
+export const IOReject = (...errors: IOError[]) =>
+  Either.left(Vector.ofIterable(errors)) as IOLeft;
