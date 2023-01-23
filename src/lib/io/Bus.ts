@@ -58,7 +58,7 @@ export default class Bus<I, O> {
    * Creates a new bus with the given name and validator. Wraps the validator in an async function.
    *
    * @param {string} name Name of the bus
-   * @param {InToOut<I, O>} decode decode function for this bus
+   * @param {IODecode<I, O> | | IOAsyncDecode<I, O>} decode decode function for this bus
    */
   static create<I, O>(
     name: string,
