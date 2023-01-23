@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npm test
+./node_modules/.bin/eslint ./src && echo "Linting passed"
+./node_modules/.bin/tsc --noEmit && echo "Compilation passed"
