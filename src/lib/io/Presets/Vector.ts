@@ -5,7 +5,7 @@ import { IOAccept, IOReject } from "../utils";
 export default <I, O>(innerBus: Bus<I, O>) => {
   const name = `Vector(${innerBus.name})`;
 
-  return Bus.create<I[], Vector<O>>(async (input) => {
+  return Bus.create<I[], Vector<O>>(name, async (input) => {
     if (input.length === 0) {
       return IOAccept(Vector.empty());
     }
@@ -36,5 +36,5 @@ export default <I, O>(innerBus: Bus<I, O>) => {
           branches: decodedInner.getLeftOrThrow(),
         })),
     });
-  }, name);
+  });
 };

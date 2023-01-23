@@ -13,7 +13,3 @@ export type IOResult<O> = IOLeft | IORight<O>;
 export type IOPromise<O> = Promise<IOResult<O>>;
 export type IODecode<I, O> = (input: I) => IOResult<O>;
 export type IOAsyncDecode<I, O> = (input: I) => IOPromise<O>;
-export type IOConditionReturn = boolean;
-export type IOCondition<I> = (
-  input: I
-) => Promise<IOConditionReturn> | IOConditionReturn;
