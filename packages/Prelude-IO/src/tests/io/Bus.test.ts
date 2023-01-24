@@ -1,5 +1,5 @@
 import { Either, Vector, Predicate } from "prelude-ts";
-import * as io from "../..";
+import * as io from "../../lib/io";
 
 describe("io.Bus", () => {
   it("executes all validations in a chain", async () => {
@@ -71,7 +71,7 @@ describe("io.Bus", () => {
   it("can be executed conditionally", async () => {
     const stringToNumber = io.Bus.create<string, number>(
       "stringToNumber",
-      (input) => Either.right(Number(input))
+      (input) => io.IOAccept(Number(input))
     );
     const isNaN = Predicate.of<number>(Number.isNaN);
     const isFinite = Predicate.of(Number.isFinite);

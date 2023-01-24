@@ -4,9 +4,10 @@
     "declaration": true,
     "outDir": "./dist",
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "doc_includes"
     ],
     "include": [
-        "src/index.ts"
+        "./src/lib/io/index.ts"
     ]
 }
