@@ -58,7 +58,7 @@ const mergePredicates = <OA, OB>(
  * @param <I> - The input type of the bus
  * @param <O> - The output type of the bus
  */
-export default class Bus<I, O> {
+export default class Bus<I = unknown, O = unknown> {
   /**
    * Constructor cannot be called directly. Instead, {@link Bus.create} should be used.
    *
