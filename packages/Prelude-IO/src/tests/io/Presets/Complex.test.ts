@@ -1,6 +1,6 @@
 import { Vector } from "prelude-ts";
 import * as io from "../../../lib/io";
-import { BusOutputType } from "../../../lib/io";
+import { BusInputType, BusOutputType } from "../../../lib/io";
 
 describe("io.Complex()", () => {
   const TestBus = io.Complex("TestBus", {
@@ -8,11 +8,15 @@ describe("io.Complex()", () => {
   });
 
   it("Decodes complex objects", async () => {
-    expect(await TestBus.decode({ str: "Foo" })).toEqual(
-      io.IOAccept<BusOutputType<typeof TestBus>>({
-        str: "Foo",
-      })
-    );
+    const input: BusInputType<typeof TestBus> = {
+      str: "Foo",
+    };
+
+    const output: BusOutputType<typeof TestBus> = {
+      str: "Foo",
+    };
+
+    expect(await TestBus.decode(input)).toEqual(io.IOAccept(output));
   });
 
   it("Works with freshly decoded JSON", async () => {

@@ -3,6 +3,45 @@ import { IODecode, IOAsyncDecode } from "./types";
 import { IOReject, mergeNames } from "./utils";
 
 /**
+ * Chains decoding functions
+ */
+const chainDecoders =
+  <T1, T2, T3>(
+    a: IOAsyncDecode<T1, T2>,
+    b: IOAsyncDecode<T2, T3>
+  ): IOAsyncDecode<T1, T3> =>
+  (input: T1) =>
+    a(input).then((intermediate) =>
+      intermediate.isLeft() ? intermediate : b(intermediate.get())
+    );
+
+const elseDecoders =
+  <IA, OA, IB, OB>(
+    name: string,
+    a: IOAsyncDecode<IA, OA>,
+    b: IOAsyncDecode<IB, OB>
+  ) =>
+  async (input: IA | IB) => {
+    const us = await a(input as IA);
+
+    if (us.isRight()) {
+      return us;
+    }
+
+    const them = await b(input as IB);
+
+    if (them.isRight()) {
+      return them;
+    }
+
+    return IOReject({
+      condition: name,
+      value: input,
+      branches: us.getLeft().appendAll(them.getLeft()),
+    });
+  };
+
+/**
  * Merges the predicates of two buses. If both buses have predicates, the predicates are combined with an OR.
  *
  * This widens the input type, which means this might need a `try/catch` block to catch type errors.
@@ -70,7 +109,9 @@ export default class Bus<I = unknown, O = unknown> {
     /** An optional [Predicate](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/files/predicate.html) exectuted on the output of the bus */
     public readonly predicate: Option<Predicate<O>>,
     /** A async decoding function */
-    public readonly decode: IOAsyncDecode<I, O>
+    public readonly decode: IOAsyncDecode<I, O>,
+    /** A async encoding function */
+    public readonly encode: IOAsyncDecode<O, I>
   ) {
     Object.freeze(this);
   }
@@ -85,9 +126,15 @@ export default class Bus<I = unknown, O = unknown> {
    */
   static create<I, O>(
     name: string,
-    decode: IODecode<I, O> | IOAsyncDecode<I, O>
+    decode: IODecode<I, O> | IOAsyncDecode<I, O>,
+    encode: IODecode<O, I> | IOAsyncDecode<O, I>
   ): Bus<I, O> {
-    return new Bus(name, Option.none(), async (input: I) => decode(input));
+    return new Bus(
+      name,
+      Option.none(),
+      async (input: I) => decode(input),
+      async (input: O) => encode(input)
+    );
   }
 
   /**
@@ -112,25 +159,8 @@ export default class Bus<I = unknown, O = unknown> {
     return new Bus<I | IB, O | OB>(
       name,
       mergePredicates(this.predicate, other.predicate),
-      async (input: I | IB) => {
-        const us = await this.decode(input as I);
-
-        if (us.isRight()) {
-          return us;
-        }
-
-        const them = await other.decode(input as IB);
-
-        if (them.isRight()) {
-          return them;
-        }
-
-        return IOReject({
-          condition: name,
-          value: input,
-          branches: us.getLeft().appendAll(them.getLeft()),
-        });
-      }
+      elseDecoders(name, this.decode, other.decode),
+      elseDecoders(name, this.encode, other.encode)
     );
   }
 
@@ -151,10 +181,11 @@ export default class Bus<I = unknown, O = unknown> {
     other: Bus<O, OB>,
     name: string = mergeNames([this.name, other.name], "->")
   ): Bus<I, OB> {
-    return new Bus(name, Option.none(), (input: I) =>
-      this.decode(input).then((intermediate) =>
-        intermediate.isLeft() ? intermediate : other.decode(intermediate.get())
-      )
+    return new Bus(
+      name,
+      Option.none(),
+      chainDecoders(this.decode, other.decode),
+      chainDecoders(other.encode, this.encode)
     );
   }
 
@@ -179,7 +210,23 @@ export default class Bus<I = unknown, O = unknown> {
    */
   public if(name: string, predicate: Predicate<O>): Bus<I, O> {
     const newBusName = `${name}(${this.name})`;
-    return new Bus(newBusName, Option.of(predicate), async (input: I) => {
+
+    const newEncode = async (input: O) => {
+      if (!predicate(input)) {
+        return IOReject({
+          condition: newBusName,
+          value: input,
+          branches: IOReject({
+            condition: name,
+            value: input,
+          }).getLeft(),
+        });
+      }
+
+      return this.encode(input);
+    };
+
+    const newDecode = async (input: I) => {
       const decodingResult = await this.decode(input);
 
       if (decodingResult.isLeft()) {
@@ -198,6 +245,8 @@ export default class Bus<I = unknown, O = unknown> {
           value: decodingResult.get(),
         }).getLeft(),
       });
-    });
+    };
+
+    return new Bus(newBusName, Option.of(predicate), newDecode, newEncode);
   }
 }

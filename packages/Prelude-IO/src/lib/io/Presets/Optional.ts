@@ -28,5 +28,10 @@ export default <I, O>(innerBus: Bus<I, O>) =>
       return decodedInner.isLeft()
         ? decodedInner
         : decodedInner.map((inner) => Option.of(inner));
+    },
+    async (input) => {
+      const inner = input.getOrNull();
+
+      return inner ? await innerBus.encode(inner) : IOAccept(null);
     }
   );

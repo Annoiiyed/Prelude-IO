@@ -1,7 +1,15 @@
 import Bus from "../Bus";
 import { IOAccept, IOReject } from "../utils";
 
-const name = "number";
+const name = "string";
+
+const acceptIfString = (input: unknown) =>
+  typeof input === "string"
+    ? IOAccept(input)
+    : IOReject({
+        condition: name,
+        value: input,
+      });
 
 /**
  * A bus that simply checks if the input is a string.
@@ -13,11 +21,8 @@ const name = "number";
  *
  * @group Presets
  */
-export default Bus.create<unknown, string>(name, (input) =>
-  typeof input === "string"
-    ? IOAccept(input)
-    : IOReject({
-        condition: name,
-        value: input,
-      })
+export default Bus.create<unknown, string>(
+  name,
+  acceptIfString,
+  acceptIfString
 );
