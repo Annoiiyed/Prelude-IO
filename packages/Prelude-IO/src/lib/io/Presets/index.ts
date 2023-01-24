@@ -1,4 +1,5 @@
 export { default as number } from "./number";
+export { default as string } from "./string";
 export { default as validNumber } from "./validNumber";
 export { default as positiveNumber } from "./positiveNumber";
 export { default as Optional } from "./Optional";
