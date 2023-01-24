@@ -1,0 +1,12 @@
+{
+  "entryPoints": [
+    "./src/lib/io/index.ts"
+  ],
+  "excludeInternal": true,
+  "categorizeByGroup": true,
+  "validation": {
+    "invalidLink": true,
+    "notDocumented": false
+  },
+  "includes": "./doc_includes"
+}
