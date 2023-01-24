@@ -54,3 +54,12 @@ export const IOAccept = <O>(output: O) => Either.right(output) as IORight<O>;
  */
 export const IOReject = (...errors: IOError[]) =>
   Either.left(Vector.ofIterable(errors)) as IOLeft;
+
+/**
+ * An identity function, useful for encoding busses that only check types
+ *
+ * @param <T> The input and output type
+ *
+ * @returns Whatever you pass into it
+ */
+export const identity = <T>(v: T) => v;

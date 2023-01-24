@@ -18,10 +18,8 @@ import { IOAccept, IOReject } from "../utils";
 export default <I, O>(innerBus: Bus<I, O>) => {
   const name = `Vector(${innerBus.name})`;
 
-  return Bus.create<I[], Vector<O>>(name, async (input) => {
-    if (input.length === 0) {
-      return IOAccept(Vector.empty());
-    }
+  const decode = async (input: I[]) => {
+    if (input.length === 0) IOAccept(Vector.empty());
 
     const decodedInners = Vector.ofIterable(
       await Promise.all(input.map(innerBus.decode))
@@ -33,12 +31,14 @@ export default <I, O>(innerBus: Bus<I, O>) => {
 
     if (!hasLeft) {
       return IOAccept(
-        decodedInners.map((decodedInner) => decodedInner.getOrThrow() as O)
+        Vector.ofIterable(
+          decodedInners.map((decodedInner) => decodedInner.getOrThrow() as O)
+        )
       );
     }
 
     return IOReject({
-      condition: `Vector(${innerBus.name})`,
+      condition: name,
       value: input,
       branches: decodedInners
         .zipWithIndex()
@@ -49,5 +49,40 @@ export default <I, O>(innerBus: Bus<I, O>) => {
           branches: decodedInner.getLeftOrThrow(),
         })),
     });
-  });
+  };
+
+  const encode = async (input: Vector<O>) => {
+    if (input.isEmpty()) return IOAccept([]);
+
+    const decodedInners = Vector.ofIterable(
+      await Promise.all(input.map(innerBus.encode))
+    );
+
+    const hasLeft = decodedInners.anyMatch((decodedInner) =>
+      decodedInner.isLeft()
+    );
+
+    if (!hasLeft) {
+      return IOAccept(
+        decodedInners
+          .map((decodedInner) => decodedInner.getOrThrow() as I)
+          .toArray()
+      );
+    }
+
+    return IOReject({
+      condition: name,
+      value: input,
+      branches: decodedInners
+        .zipWithIndex()
+        .filter(([decodedInner]) => decodedInner.isLeft())
+        .map(([decodedInner, index]) => ({
+          condition: `${innerBus.name}[${index}]`,
+          value: input.get(index).getOrThrow(),
+          branches: decodedInner.getLeftOrThrow(),
+        })),
+    });
+  };
+
+  return Bus.create<I[], Vector<O>>(name, decode, encode);
 };
