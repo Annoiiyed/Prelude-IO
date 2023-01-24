@@ -4,3 +4,4 @@ export { default as validNumber } from "./validNumber";
 export { default as positiveNumber } from "./positiveNumber";
 export { default as Optional } from "./Optional";
 export { default as Vector } from "./Vector";
+export { default as Complex } from "./Complex";
