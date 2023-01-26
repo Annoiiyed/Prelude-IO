@@ -19,7 +19,7 @@ describe("io.number", () => {
       })
     );
 
-    // @ts-expect-error Testing
+    // @ts-expect-error Testing invalid input
     expect(await io.number.serialize("foo bar baz")).toEqual(
       io.IOReject({
         condition: "isNumber(any)",

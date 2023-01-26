@@ -23,7 +23,7 @@ describe("io.string", () => {
       })
     );
 
-    // @ts-expect-error Testing
+    // @ts-expect-error Testing invalid input
     expect(await io.string.serialize(123)).toEqual(
       io.IOReject({
         condition: "isString(any)",

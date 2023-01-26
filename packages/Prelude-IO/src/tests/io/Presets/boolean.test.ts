@@ -16,7 +16,7 @@ describe("io.number", () => {
           .getLeft(),
       })
     );
-    // @ts-expect-error Testing
+    // @ts-expect-error Testing invalid input
     expect(await io.boolean.serialize("true")).toEqual(
       io.IOReject({
         condition: "isBoolean(any)",

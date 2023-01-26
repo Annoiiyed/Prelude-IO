@@ -7,6 +7,11 @@ describe("io.Complex()", () => {
     str: io.string,
   });
 
+  const NestedBus = io.Complex("NestedBus", {
+    num: io.Vector(io.number),
+    nest: TestBus,
+  });
+
   it("Deserializes complex objects", async () => {
     const input: BusInputType<typeof TestBus> = {
       str: "Foo",
@@ -29,23 +34,41 @@ describe("io.Complex()", () => {
     );
   });
 
+  it("Deep rejects mismatching fields", async () => {
+    expect((await TestBus.deserialize({ str: 4 })).isLeft()).toBe(true);
+
+    // @ts-expect-error Testing invalid input
+    expect((await TestBus.serialize({ str: 4 })).isLeft()).toBe(true);
+  });
+
   it("Deserializes complex objects when nested", async () => {
-    const NestedBus = io.Complex("NestedBus", {
-      num: io.Vector(io.number),
-      nest: TestBus,
-    });
-
-    const input = {
-      num: [3, 5, 7],
-      nest: { str: "Foo" },
-    };
-
-    expect(await NestedBus.deserialize(input)).toEqual(
+    expect(
+      await NestedBus.deserialize({
+        num: [3, 5, 7],
+        nest: { str: "Foo" },
+      })
+    ).toEqual(
       io.IOAccept<BusOutputType<typeof NestedBus>>({
         num: Vector.of(3, 5, 7),
         nest: {
           str: "Foo",
         },
+      })
+    );
+  });
+
+  it("Serializes complex objects", async () => {
+    expect(
+      await NestedBus.serialize({
+        num: Vector.of(3, 5, 7),
+        nest: {
+          str: "Foo",
+        },
+      })
+    ).toEqual(
+      io.IOAccept<BusInputType<typeof NestedBus>>({
+        num: [3, 5, 7],
+        nest: { str: "Foo" },
       })
     );
   });

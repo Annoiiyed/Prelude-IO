@@ -1,6 +1,7 @@
 import { Option } from "prelude-ts";
 import Bus from "../Bus";
-import { IOAccept } from "../utils";
+import { IOResult } from "../types";
+import { IOAccept, IOReject } from "../utils";
 
 /**
  * A bus factory that allows a bus to be wrapped in an [Option](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/files/option.html).
@@ -15,23 +16,35 @@ import { IOAccept } from "../utils";
  *
  * @group Presets
  */
-export default <I, O>(innerBus: Bus<I, O>) =>
-  Bus.create<I | null, Option<O>>(
-    `Optional(${innerBus.name})`,
+export default <I, O>(innerBus: Bus<I, O>) => {
+  const name = `Optional(${innerBus.name})`;
+  return Bus.create<I | null, Option<O>>(
+    name,
     async (input) => {
       if (input === null) {
         return IOAccept(Option.none());
       }
 
-      const deserializedInner = await innerBus.deserialize(input);
-
-      return deserializedInner.isLeft()
-        ? deserializedInner
-        : deserializedInner.map((inner) => Option.of(inner));
+      return (await innerBus.deserialize(input)).bimap(
+        (branches) =>
+          IOReject({
+            condition: name,
+            value: input,
+            branches: branches,
+          }).getLeft(),
+        (inner) => Option.of(inner as O)
+      ) as IOResult<Option<O>>;
     },
     async (input) => {
-      const inner = input.getOrNull();
-
-      return inner ? await innerBus.serialize(inner) : IOAccept(null);
+      return input.isNone()
+        ? IOAccept(null)
+        : ((await innerBus.serialize(input.get())).mapLeft((branches) =>
+            IOReject({
+              condition: name,
+              value: input,
+              branches: branches,
+            }).getLeft()
+          ) as IOResult<I>);
     }
   );
+};
