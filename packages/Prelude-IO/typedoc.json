@@ -8,5 +8,5 @@
     "invalidLink": true,
     "notDocumented": false
   },
-  "includes": "./doc_includes"
+  "includes": "./examples"
 }
