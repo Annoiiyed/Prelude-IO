@@ -13,4 +13,4 @@ const isPositive = Predicate.of((n: number) => n > 0);
  *
  * @group Presets
  */
-export default validNumber.if("positiveNumber", isPositive);
+export default validNumber.if("isPositive", isPositive);
