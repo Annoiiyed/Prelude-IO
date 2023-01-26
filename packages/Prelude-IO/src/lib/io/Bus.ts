@@ -4,12 +4,19 @@ import { IOReject, mergeNames } from "./utils";
 
 const chainTransformers =
   <T1, T2, T3>(
+    name: string,
     a: IOAsyncTransformer<T1, T2>,
     b: IOAsyncTransformer<T2, T3>
   ): IOAsyncTransformer<T1, T3> =>
   (input: T1) =>
     a(input).then((intermediate) =>
-      intermediate.isLeft() ? intermediate : b(intermediate.get())
+      intermediate.isLeft()
+        ? IOReject({
+            condition: name,
+            value: input,
+            branches: intermediate.getLeft(),
+          })
+        : b(intermediate.get())
     );
 
 const elseTransformers =
@@ -37,31 +44,6 @@ const elseTransformers =
       branches: us.getLeft().appendAll(them.getLeft()),
     });
   };
-
-/**
- * Merges the predicates of two buses. If both buses have predicates, the predicates are combined with an OR.
- *
- * This widens the input type, which means this might need a `try/catch` block to catch type errors.
- *
- * @param us - The first predicate
- * @param them - The second predicate
- *
- * @internal
- *
- * @returns An option that might contain a combined Predicate
- */
-const mergePredicates = <OA, OB>(
-  us: Option<Predicate<OA>>,
-  them: Option<Predicate<OB>>
-): Option<Predicate<OA | OB>> => {
-  if (us.isNone() && them.isNone()) return Option.none();
-  if (us.isNone()) return them as Option<Predicate<OA | OB>>;
-  if (them.isNone()) return us as Option<Predicate<OA | OB>>;
-
-  return Option.some(
-    (us.get() as Predicate<OA | OB>).or(them.get() as Predicate<OA | OB>)
-  );
-};
 
 /**
  * A bus is a wrapper around two transformers (serialize and deserialize), with some basic logic included such as chaining or unions.
@@ -138,8 +120,6 @@ export default class Bus<I = unknown, O = unknown> {
    * Creates a new bus with the given name and bus, returning the
    * result of the first bus if it succeeds, otherwise the result of the second bus.
    *
-   * [Predicates](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/files/predicate.html) are merged, which means the input type is widened.
-   *
    * On failure, returns the errors of both busses.
    *
    * @param <IB> - The other bus' input
@@ -155,7 +135,7 @@ export default class Bus<I = unknown, O = unknown> {
   ): Bus<I | IB, O | OB> {
     return new Bus<I | IB, O | OB>(
       name,
-      mergePredicates(this.predicate, other.predicate),
+      Option.none(),
       elseTransformers(name, this.deserialize, other.deserialize),
       elseTransformers(name, this.serialize, other.serialize)
     );
@@ -181,8 +161,8 @@ export default class Bus<I = unknown, O = unknown> {
     return new Bus(
       name,
       Option.none(),
-      chainTransformers(this.deserialize, other.deserialize),
-      chainTransformers(other.serialize, this.serialize)
+      chainTransformers(name, this.deserialize, other.deserialize),
+      chainTransformers(name, other.serialize, this.serialize)
     );
   }
 

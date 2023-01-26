@@ -1,8 +1,9 @@
 import { Either, Vector, Predicate } from "prelude-ts";
 import * as io from "../../lib/io";
+import { IOAccept, IOReject } from "../../lib/io";
 
 describe("io.Bus", () => {
-  it("executes all serializers in a chain", async () => {
+  it("can be chained together", async () => {
     const numberToTwiceThat: io.IOTransformer<number, number> = jest
       .fn()
       .mockImplementation((n) => Either.right(n * 2));
@@ -27,6 +28,34 @@ describe("io.Bus", () => {
     expect((await tripleChainedBus.serialize(8)).getOrThrow()).toEqual(1);
 
     expect(numberToHalfThat).toHaveBeenCalledTimes(3);
+  });
+
+  it("fails if a bus in a chain fails", async () => {
+    const f = (i: number) =>
+      IOReject({
+        condition: "willFail",
+        value: i,
+      });
+
+    const p = (i: number) => IOAccept(i);
+
+    const willFail = io.Bus.create<number, number>("willFail", f, f);
+    const willPass = io.Bus.create<number, number>("willPass", p, p);
+
+    const middleWillFail = willPass.chain(willFail).chain(willPass);
+
+    expect(await middleWillFail.deserialize(1)).toEqual(
+      io.IOReject({
+        condition: "(willPass -> willFail) -> willPass",
+        value: 1,
+        branches: io
+          .IOReject({
+            condition: "willFail",
+            value: 1,
+          })
+          .getLeft(),
+      })
+    );
   });
 
   it("can be executed conditionally", async () => {
@@ -77,6 +106,63 @@ describe("io.Bus", () => {
           condition: "isEven",
           value: 3,
         }),
+      })
+    );
+  });
+
+  it("can be joined together", async () => {
+    const oneToTwo = io.Bus.create<number, number>(
+      "oneToTwo",
+      (i) =>
+        i === 1 ? IOAccept(2) : IOReject({ condition: "oneToTwo", value: i }),
+      (i) =>
+        i === 2 ? IOAccept(1) : IOReject({ condition: "oneToTwo", value: i })
+    );
+
+    const fourToFive = io.Bus.create<number, number>(
+      "fourToFive",
+      (i) =>
+        i === 4 ? IOAccept(5) : IOReject({ condition: "fourToFive", value: i }),
+      (i) =>
+        i === 5 ? IOAccept(4) : IOReject({ condition: "fourToFive", value: i })
+    );
+
+    const joined = oneToTwo.else(fourToFive);
+
+    expect(await joined.deserialize(1)).toEqual(IOAccept(2));
+    expect(await joined.deserialize(4)).toEqual(IOAccept(5));
+    expect(await joined.serialize(2)).toEqual(IOAccept(1));
+    expect(await joined.serialize(5)).toEqual(IOAccept(4));
+    expect(await joined.deserialize(3)).toEqual(
+      IOReject({
+        condition: "oneToTwo | fourToFive",
+        value: 3,
+        branches: Vector.of(
+          {
+            condition: "oneToTwo",
+            value: 3,
+          },
+          {
+            condition: "fourToFive",
+            value: 3,
+          }
+        ),
+      })
+    );
+    expect(await joined.serialize(3)).toEqual(
+      IOReject({
+        condition: "oneToTwo | fourToFive",
+        value: 3,
+        branches: Vector.of(
+          {
+            condition: "oneToTwo",
+            value: 3,
+          },
+          {
+            condition: "fourToFive",
+            value: 3,
+          }
+        ),
       })
     );
   });
