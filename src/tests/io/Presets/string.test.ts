@@ -1,16 +1,16 @@
 import * as io from "../../../lib/io";
 
 describe("io.string", () => {
-  it("decodes/encodes values, returnging IOLeft on non-strings", async () => {
-    expect(await io.string.decode("foo bar baz")).toEqual(
+  it("deserializes/serializes values, returnging IOLeft on non-strings", async () => {
+    expect(await io.string.deserialize("foo bar baz")).toEqual(
       io.IOAccept("foo bar baz")
     );
 
-    expect(await io.string.encode("foo bar baz")).toEqual(
+    expect(await io.string.serialize("foo bar baz")).toEqual(
       io.IOAccept("foo bar baz")
     );
 
-    expect(await io.string.decode(123)).toEqual(
+    expect(await io.string.deserialize(123)).toEqual(
       io.IOReject({
         condition: "string",
         value: 123,
@@ -18,14 +18,14 @@ describe("io.string", () => {
     );
 
     // @ts-expect-error Testing
-    expect(await io.string.encode(123)).toEqual(
+    expect(await io.string.serialize(123)).toEqual(
       io.IOReject({
         condition: "string",
         value: 123,
       })
     );
 
-    expect(await io.string.decode(null)).toEqual(
+    expect(await io.string.deserialize(null)).toEqual(
       io.IOReject({
         condition: "string",
         value: null,

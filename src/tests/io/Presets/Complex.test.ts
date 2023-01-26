@@ -7,7 +7,7 @@ describe("io.Complex()", () => {
     str: io.string,
   });
 
-  it("Decodes complex objects", async () => {
+  it("Deserializes complex objects", async () => {
     const input: BusInputType<typeof TestBus> = {
       str: "Foo",
     };
@@ -16,20 +16,20 @@ describe("io.Complex()", () => {
       str: "Foo",
     };
 
-    expect(await TestBus.decode(input)).toEqual(io.IOAccept(output));
+    expect(await TestBus.deserialize(input)).toEqual(io.IOAccept(output));
   });
 
-  it("Works with freshly decoded JSON", async () => {
+  it("Works with freshly deserialized JSON", async () => {
     const json = JSON.parse('{"str": "Foo"}');
 
-    expect(await TestBus.decode(json)).toEqual(
+    expect(await TestBus.deserialize(json)).toEqual(
       io.IOAccept({
         str: "Foo",
       })
     );
   });
 
-  it("Decodes complex objects when nested", async () => {
+  it("Deserializes complex objects when nested", async () => {
     const NestedBus = io.Complex("NestedBus", {
       num: io.Vector(io.number),
       nest: TestBus,
@@ -40,7 +40,7 @@ describe("io.Complex()", () => {
       nest: { str: "Foo" },
     };
 
-    expect(await NestedBus.decode(input)).toEqual(
+    expect(await NestedBus.deserialize(input)).toEqual(
       io.IOAccept<BusOutputType<typeof NestedBus>>({
         num: Vector.of(3, 5, 7),
         nest: {

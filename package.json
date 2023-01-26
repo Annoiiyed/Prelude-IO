@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "test": "jest",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "docs:update": "typedoc --validation"
   },
   "repository": {
     "type": "git",

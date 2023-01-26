@@ -1,25 +1,22 @@
 import { Option, Predicate } from "prelude-ts";
-import { IODecode, IOAsyncDecode } from "./types";
+import { IOTransformer, IOAsyncTransformer } from "./types";
 import { IOReject, mergeNames } from "./utils";
 
-/**
- * Chains decoding functions
- */
-const chainDecoders =
+const chainTransformers =
   <T1, T2, T3>(
-    a: IOAsyncDecode<T1, T2>,
-    b: IOAsyncDecode<T2, T3>
-  ): IOAsyncDecode<T1, T3> =>
+    a: IOAsyncTransformer<T1, T2>,
+    b: IOAsyncTransformer<T2, T3>
+  ): IOAsyncTransformer<T1, T3> =>
   (input: T1) =>
     a(input).then((intermediate) =>
       intermediate.isLeft() ? intermediate : b(intermediate.get())
     );
 
-const elseDecoders =
+const elseTransformers =
   <IA, OA, IB, OB>(
     name: string,
-    a: IOAsyncDecode<IA, OA>,
-    b: IOAsyncDecode<IB, OB>
+    a: IOAsyncTransformer<IA, OA>,
+    b: IOAsyncTransformer<IB, OB>
   ) =>
   async (input: IA | IB) => {
     const us = await a(input as IA);
@@ -67,20 +64,20 @@ const mergePredicates = <OA, OB>(
 };
 
 /**
- * A bus is a wrapper around a decoder, with some basic logic included such as chaining or unions.
+ * A bus is a wrapper around two transformers (serialize and deserialize), with some basic logic included such as chaining or unions.
  *
  * Busses are executed in parallel, so the order of the errors is not guaranteed (but should not matter).
- * When chaining busses, the decoded value of the first bus is returned, the others are ignored. This might change in the future.
+ * When chaining busses, the deserialized value of the first bus is returned, the others are ignored. This might change in the future.
  *
- * Decoders do not need to be asyncronous on initiation for ease of use, but on Bus creation, they will
+ * Transformers do not need to be asyncronous on initiation for ease of use, but on Bus creation, they will
  * always be wrapped in a Promise.
  *
- * Decoders should ALWAYS resolve to a Result, never throw an error or reject. This is a philosophical choice based on
+ * Transformers should ALWAYS resolve to a Result, never throw an error or reject. This is a philosophical choice based on
  * functional programming paradigms. Result objects allow functions to explicitly return errors, and the caller can decide
  * what to do with them. Throwing errors is a side effect, and should be avoided.
  *
  * [Predicates](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/files/predicate.html) can be attached to ensure
- * validity of the external type, that isn't relevant for the decoding process.
+ * validity of the external type, that isn't relevant for the transforming process.
  *
  * @example
  * Ensure something is a number:
@@ -108,32 +105,32 @@ export default class Bus<I = unknown, O = unknown> {
     public readonly name: string,
     /** An optional [Predicate](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/files/predicate.html) exectuted on the output of the bus */
     public readonly predicate: Option<Predicate<O>>,
-    /** A async decoding function */
-    public readonly decode: IOAsyncDecode<I, O>,
-    /** A async encoding function */
-    public readonly encode: IOAsyncDecode<O, I>
+    /** A async deserialization function */
+    public readonly deserialize: IOAsyncTransformer<I, O>,
+    /** A async serialization function */
+    public readonly serialize: IOAsyncTransformer<O, I>
   ) {
     Object.freeze(this);
   }
 
   /**
-   * Creates a new bus with the given name and decoder. Wraps the decoder in an async function.
+   * Creates a new bus with the given name and deserializer. Wraps the deserializer in an async function.
    *
    * @param <I> - The input type for the new bus
    * @param <O> - The output type for the new bus
    * @param name - Name of the bus
-   * @param decode - decode function for this bus. Will be turned into a Promise.
+   * @param deserialize - deserialize function for this bus. Will be turned into a Promise.
    */
   static create<I, O>(
     name: string,
-    decode: IODecode<I, O> | IOAsyncDecode<I, O>,
-    encode: IODecode<O, I> | IOAsyncDecode<O, I>
+    deserialize: IOTransformer<I, O> | IOAsyncTransformer<I, O>,
+    serialize: IOTransformer<O, I> | IOAsyncTransformer<O, I>
   ): Bus<I, O> {
     return new Bus(
       name,
       Option.none(),
-      async (input: I) => decode(input),
-      async (input: O) => encode(input)
+      async (input: I) => deserialize(input),
+      async (input: O) => serialize(input)
     );
   }
 
@@ -159,8 +156,8 @@ export default class Bus<I = unknown, O = unknown> {
     return new Bus<I | IB, O | OB>(
       name,
       mergePredicates(this.predicate, other.predicate),
-      elseDecoders(name, this.decode, other.decode),
-      elseDecoders(name, this.encode, other.encode)
+      elseTransformers(name, this.deserialize, other.deserialize),
+      elseTransformers(name, this.serialize, other.serialize)
     );
   }
 
@@ -184,14 +181,14 @@ export default class Bus<I = unknown, O = unknown> {
     return new Bus(
       name,
       Option.none(),
-      chainDecoders(this.decode, other.decode),
-      chainDecoders(other.encode, this.encode)
+      chainTransformers(this.deserialize, other.deserialize),
+      chainTransformers(other.serialize, this.serialize)
     );
   }
 
   /**
    * Attaches a [Predicate](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/files/predicate.html) to a bus.
-   * The predicate is applied on the decoded value before returning.
+   * The predicate is applied on the deserialized value before returning.
    * @example
    * Add a predicate to a bus:
    * ```typescript
@@ -211,7 +208,7 @@ export default class Bus<I = unknown, O = unknown> {
   public if(name: string, predicate: Predicate<O>): Bus<I, O> {
     const newBusName = `${name}(${this.name})`;
 
-    const newEncode = async (input: O) => {
+    const newserialize = async (input: O) => {
       if (!predicate(input)) {
         return IOReject({
           condition: newBusName,
@@ -223,18 +220,18 @@ export default class Bus<I = unknown, O = unknown> {
         });
       }
 
-      return this.encode(input);
+      return this.serialize(input);
     };
 
-    const newDecode = async (input: I) => {
-      const decodingResult = await this.decode(input);
+    const newDeserialize = async (input: I) => {
+      const deserialized = await this.deserialize(input);
 
-      if (decodingResult.isLeft()) {
-        return decodingResult;
+      if (deserialized.isLeft()) {
+        return deserialized;
       }
 
-      if (predicate(decodingResult.get())) {
-        return decodingResult;
+      if (predicate(deserialized.get())) {
+        return deserialized;
       }
 
       return IOReject({
@@ -242,11 +239,16 @@ export default class Bus<I = unknown, O = unknown> {
         value: input,
         branches: IOReject({
           condition: name,
-          value: decodingResult.get(),
+          value: deserialized.get(),
         }).getLeft(),
       });
     };
 
-    return new Bus(newBusName, Option.of(predicate), newDecode, newEncode);
+    return new Bus(
+      newBusName,
+      Option.of(predicate),
+      newDeserialize,
+      newserialize
+    );
   }
 }

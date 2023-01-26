@@ -2,12 +2,12 @@ import { Either, Vector, Predicate } from "prelude-ts";
 import * as io from "../../lib/io";
 
 describe("io.Bus", () => {
-  it("executes all encoders in a chain", async () => {
-    const numberToTwiceThat: io.IODecode<number, number> = jest
+  it("executes all serializers in a chain", async () => {
+    const numberToTwiceThat: io.IOTransformer<number, number> = jest
       .fn()
       .mockImplementation((n) => Either.right(n * 2));
 
-    const numberToHalfThat: io.IODecode<number, number> = jest
+    const numberToHalfThat: io.IOTransformer<number, number> = jest
       .fn()
       .mockImplementation((n) => Either.right(n / 2));
 
@@ -19,12 +19,12 @@ describe("io.Bus", () => {
 
     const tripleChainedBus = double.chain(double).chain(double);
 
-    expect((await tripleChainedBus.decode(1)).getOrThrow()).toEqual(8);
+    expect((await tripleChainedBus.deserialize(1)).getOrThrow()).toEqual(8);
 
     expect(numberToTwiceThat).toHaveBeenCalledTimes(3);
     expect(numberToHalfThat).toHaveBeenCalledTimes(0);
 
-    expect((await tripleChainedBus.encode(8)).getOrThrow()).toEqual(1);
+    expect((await tripleChainedBus.serialize(8)).getOrThrow()).toEqual(1);
 
     expect(numberToHalfThat).toHaveBeenCalledTimes(3);
   });
@@ -41,8 +41,8 @@ describe("io.Bus", () => {
     const isValid = isNaN.negate().and(isFinite);
     const stringToValidNumber = stringToNumber.if("isValid", isValid);
 
-    expect(await stringToValidNumber.decode("1")).toEqual(Either.right(1));
-    expect(await stringToValidNumber.decode("one")).toEqual(
+    expect(await stringToValidNumber.deserialize("1")).toEqual(Either.right(1));
+    expect(await stringToValidNumber.deserialize("one")).toEqual(
       io.IOReject({
         condition: "isValid(stringToNumber)",
         value: "one",
@@ -56,8 +56,8 @@ describe("io.Bus", () => {
     const isEven = Predicate.of<number>((n) => n % 2 === 0);
     const stringToEvenNumber = stringToValidNumber.if("isEven", isEven);
 
-    expect(await stringToEvenNumber.decode("2")).toEqual(Either.right(2));
-    expect(await stringToEvenNumber.decode("3")).toEqual(
+    expect(await stringToEvenNumber.deserialize("2")).toEqual(Either.right(2));
+    expect(await stringToEvenNumber.deserialize("3")).toEqual(
       io.IOReject({
         condition: "isEven(isValid(stringToNumber))",
         value: "3",
@@ -68,8 +68,8 @@ describe("io.Bus", () => {
       })
     );
 
-    expect(await stringToEvenNumber.encode(2)).toEqual(Either.right("2"));
-    expect(await stringToEvenNumber.encode(3)).toEqual(
+    expect(await stringToEvenNumber.serialize(2)).toEqual(Either.right("2"));
+    expect(await stringToEvenNumber.serialize(3)).toEqual(
       io.IOReject({
         condition: "isEven(isValid(stringToNumber))",
         value: 3,

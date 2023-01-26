@@ -9,8 +9,10 @@ import {
 } from "../types";
 import { IOAccept, IOReject } from "../utils";
 
-const decodeInput = Function2.of((v, bus: Bus) => bus.decode(v)).tupled();
-const encodeInput = Function2.of((v, bus: Bus) => bus.encode(v)).tupled();
+const deserializeInput = Function2.of((v, bus: Bus) =>
+  bus.deserialize(v)
+).tupled();
+const serializeInput = Function2.of((v, bus: Bus) => bus.serialize(v)).tupled();
 
 const toValueBusPairs = <I extends Record<string, unknown>>(
   inner: ComplexFields,
@@ -18,10 +20,13 @@ const toValueBusPairs = <I extends Record<string, unknown>>(
 ): [unknown, Bus][] =>
   Object.entries(input).map(([key, value]) => [value, inner[key]]);
 
-const reformMap = (inner: ComplexFields, decoded: Vector<IOResult<unknown>>) =>
+const reformMap = (
+  inner: ComplexFields,
+  deserialized: Vector<IOResult<unknown>>
+) =>
   Function0.of(() => Object.keys(inner))
     .andThen(Vector.ofIterable)
-    .andThen((keys) => keys.zip(decoded))
+    .andThen((keys) => keys.zip(deserialized))
     .andThen(HashMap.ofIterable)();
 
 const rejectMap = <I extends Record<string, unknown>>(
@@ -69,11 +74,11 @@ const Complex = <I extends ComplexFields>(
   type Input = ComplexInput<typeof inner>;
   type Output = ComplexOutput<typeof inner>;
 
-  const decode = async (input: Input) => {
+  const deserialize = async (input: Input) => {
     const valueBusPairs = toValueBusPairs(inner, input);
 
     const processedInners = await Promise.all(
-      valueBusPairs.map(decodeInput)
+      valueBusPairs.map(deserializeInput)
     ).then(Vector.ofIterable);
 
     const map = reformMap(inner, processedInners);
@@ -85,11 +90,11 @@ const Complex = <I extends ComplexFields>(
     ) as IOResult<Output>;
   };
 
-  const encode = async (input: Output) => {
+  const serialize = async (input: Output) => {
     const valueBusPairs = toValueBusPairs(inner, input);
 
     const processedInners = await Promise.all(
-      valueBusPairs.map(encodeInput)
+      valueBusPairs.map(serializeInput)
     ).then(Vector.ofIterable);
 
     const map = reformMap(inner, processedInners);
@@ -101,7 +106,7 @@ const Complex = <I extends ComplexFields>(
     ) as IOResult<Input>;
   };
 
-  return Bus.create<Input, Output>(name, decode, encode);
+  return Bus.create<Input, Output>(name, deserialize, serialize);
 };
 
 export default Complex;
