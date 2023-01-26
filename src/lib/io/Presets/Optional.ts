@@ -23,10 +23,15 @@ export default <I, O>(innerBus: Bus<I, O>) =>
         return IOAccept(Option.none());
       }
 
-      const decodedInner = await innerBus.decode(input);
+      const deserializedInner = await innerBus.deserialize(input);
 
-      return decodedInner.isLeft()
-        ? decodedInner
-        : decodedInner.map((inner) => Option.of(inner));
+      return deserializedInner.isLeft()
+        ? deserializedInner
+        : deserializedInner.map((inner) => Option.of(inner));
+    },
+    async (input) => {
+      const inner = input.getOrNull();
+
+      return inner ? await innerBus.serialize(inner) : IOAccept(null);
     }
   );

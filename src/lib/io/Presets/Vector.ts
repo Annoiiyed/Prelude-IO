@@ -18,36 +18,73 @@ import { IOAccept, IOReject } from "../utils";
 export default <I, O>(innerBus: Bus<I, O>) => {
   const name = `Vector(${innerBus.name})`;
 
-  return Bus.create<I[], Vector<O>>(name, async (input) => {
-    if (input.length === 0) {
-      return IOAccept(Vector.empty());
-    }
+  const deserialize = async (input: I[]) => {
+    if (input.length === 0) IOAccept(Vector.empty());
 
-    const decodedInners = Vector.ofIterable(
-      await Promise.all(input.map(innerBus.decode))
+    const deserializedInners = Vector.ofIterable(
+      await Promise.all(input.map(innerBus.deserialize))
     );
 
-    const hasLeft = decodedInners.anyMatch((decodedInner) =>
-      decodedInner.isLeft()
+    const hasLeft = deserializedInners.anyMatch((deserializedInner) =>
+      deserializedInner.isLeft()
     );
 
     if (!hasLeft) {
       return IOAccept(
-        decodedInners.map((decodedInner) => decodedInner.getOrThrow() as O)
+        Vector.ofIterable(
+          deserializedInners.map(
+            (deserializedInner) => deserializedInner.getOrThrow() as O
+          )
+        )
       );
     }
 
     return IOReject({
-      condition: `Vector(${innerBus.name})`,
+      condition: name,
       value: input,
-      branches: decodedInners
+      branches: deserializedInners
         .zipWithIndex()
-        .filter(([decodedInner]) => decodedInner.isLeft())
-        .map(([decodedInner, index]) => ({
+        .filter(([deserializedInner]) => deserializedInner.isLeft())
+        .map(([deserializedInner, index]) => ({
           condition: `${innerBus.name}[${index}]`,
           value: input[index],
-          branches: decodedInner.getLeftOrThrow(),
+          branches: deserializedInner.getLeftOrThrow(),
         })),
     });
-  });
+  };
+
+  const serialize = async (input: Vector<O>) => {
+    if (input.isEmpty()) return IOAccept([]);
+
+    const deserializedInners = Vector.ofIterable(
+      await Promise.all(input.map(innerBus.serialize))
+    );
+
+    const hasLeft = deserializedInners.anyMatch((deserializedInner) =>
+      deserializedInner.isLeft()
+    );
+
+    if (!hasLeft) {
+      return IOAccept(
+        deserializedInners
+          .map((deserializedInner) => deserializedInner.getOrThrow() as I)
+          .toArray()
+      );
+    }
+
+    return IOReject({
+      condition: name,
+      value: input,
+      branches: deserializedInners
+        .zipWithIndex()
+        .filter(([deserializedInner]) => deserializedInner.isLeft())
+        .map(([deserializedInner, index]) => ({
+          condition: `${innerBus.name}[${index}]`,
+          value: input.get(index).getOrThrow(),
+          branches: deserializedInner.getLeftOrThrow(),
+        })),
+    });
+  };
+
+  return Bus.create<I[], Vector<O>>(name, deserialize, serialize);
 };

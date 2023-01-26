@@ -2,8 +2,8 @@
  *
  * Core functions for Prelude-IO.
  *
- * See {@link Bus} for how this library handles data
- * or the items under Presets below for types provided by this library out of the box
+ * See {@link Bus} for how this library handles data, or the items under
+ * Presets below for types provided by this library out of the box
  *
  * @module @Prelude-IO/Core
  */

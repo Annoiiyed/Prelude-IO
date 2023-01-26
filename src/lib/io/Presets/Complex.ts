@@ -5,11 +5,54 @@ import {
   ComplexFields,
   ComplexInput,
   ComplexOutput,
-  IOError,
+  IOResult,
 } from "../types";
 import { IOAccept, IOReject } from "../utils";
 
-const decodeInput = Function2.of((v, bus: Bus) => bus.decode(v)).tupled();
+const deserializeInput = Function2.of((v, bus: Bus) =>
+  bus.deserialize(v)
+).tupled();
+const serializeInput = Function2.of((v, bus: Bus) => bus.serialize(v)).tupled();
+
+const toValueBusPairs = <I extends Record<string, unknown>>(
+  inner: ComplexFields,
+  input: I
+): [unknown, Bus][] =>
+  Object.entries(input).map(([key, value]) => [value, inner[key]]);
+
+const reformMap = (
+  inner: ComplexFields,
+  deserialized: Vector<IOResult<unknown>>
+) =>
+  Function0.of(() => Object.keys(inner))
+    .andThen(Vector.ofIterable)
+    .andThen((keys) => keys.zip(deserialized))
+    .andThen(HashMap.ofIterable)();
+
+const rejectMap = <I extends Record<string, unknown>>(
+  map: HashMap<string, IOResult<unknown>>,
+  input: I,
+  name: string
+) =>
+  IOReject({
+    condition: name,
+    value: input,
+    branches: map
+      .filterValues((v) => v.isLeft())
+      .toVector()
+      .map(([key, result]) => ({
+        value: input[key],
+        condition: `${name}.${key}`,
+        branches: result.getLeftOrThrow(),
+      })),
+  });
+
+const acceptMap = <D extends ComplexInput<ComplexFields>>(
+  map: HashMap<string, IOResult<unknown>>
+) =>
+  IOAccept(
+    map.mapValues((r) => r.getOrThrow()).toObjectDictionary(String) as D
+  );
 
 /**
  * A bus factory that allows multiple busses to make up a complex type.
@@ -28,47 +71,42 @@ const Complex = <I extends ComplexFields>(
   name: string,
   inner: I
 ): ComplexBus<typeof inner> => {
-  return Bus.create<ComplexInput<typeof inner>, ComplexOutput<typeof inner>>(
-    name,
-    async (input) => {
-      const valueBusPairs: [string, Bus][] = Object.entries(input).map(
-        ([key, value]) => [value, inner[key]]
-      );
+  type Input = ComplexInput<typeof inner>;
+  type Output = ComplexOutput<typeof inner>;
 
-      const decodedInners = await Promise.all(
-        valueBusPairs.map(decodeInput)
-      ).then(Vector.ofIterable);
+  const deserialize = async (input: Input) => {
+    const valueBusPairs = toValueBusPairs(inner, input);
 
-      const map = Function0.of(() => Object.keys(inner))
-        .andThen(Vector.ofIterable)
-        .andThen((keys) => keys.zip(decodedInners))
-        .andThen(HashMap.ofIterable)();
+    const processedInners = await Promise.all(
+      valueBusPairs.map(deserializeInput)
+    ).then(Vector.ofIterable);
 
-      if (map.anyMatch((_, r) => r.isLeft())) {
-        return IOReject({
-          condition: name,
-          value: input,
-          branches: map
-            .filterValues((v) => v.isLeft())
-            .toVector()
-            .map(
-              ([key, result]) =>
-                ({
-                  value: input[key] as string,
-                  condition: `${name}.${key}`,
-                  branches: result.getLeftOrThrow(),
-                } as IOError)
-            ),
-        });
-      }
+    const map = reformMap(inner, processedInners);
 
-      return IOAccept(
-        map
-          .mapValues((r) => r.getOrThrow())
-          .toObjectDictionary(String) as ComplexOutput<typeof inner>
-      );
-    }
-  );
+    return (
+      map.anyMatch((_, r) => r.isLeft())
+        ? rejectMap(map, input, name)
+        : acceptMap(map)
+    ) as IOResult<Output>;
+  };
+
+  const serialize = async (input: Output) => {
+    const valueBusPairs = toValueBusPairs(inner, input);
+
+    const processedInners = await Promise.all(
+      valueBusPairs.map(serializeInput)
+    ).then(Vector.ofIterable);
+
+    const map = reformMap(inner, processedInners);
+
+    return (
+      map.anyMatch((_, r) => r.isLeft())
+        ? rejectMap(map, input, name)
+        : acceptMap(map)
+    ) as IOResult<Input>;
+  };
+
+  return Bus.create<Input, Output>(name, deserialize, serialize);
 };
 
 export default Complex;

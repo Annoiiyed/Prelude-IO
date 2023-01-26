@@ -3,6 +3,14 @@ import { IOAccept, IOReject } from "../utils";
 
 const name = "number";
 
+const acceptIfNumber = (input: unknown) =>
+  typeof input === "number"
+    ? IOAccept(input)
+    : IOReject({
+        condition: name,
+        value: input,
+      });
+
 /**
  * A bus that simply checks if the input is a number. Allows `NaN` and `Infinity` to be passed.
  *
@@ -15,11 +23,8 @@ const name = "number";
  *
  * @group Presets
  */
-export default Bus.create<unknown, number>(name, (input) =>
-  typeof input === "number"
-    ? IOAccept(input)
-    : IOReject({
-        condition: name,
-        value: input,
-      })
+export default Bus.create<unknown, number>(
+  name,
+  acceptIfNumber,
+  acceptIfNumber
 );
