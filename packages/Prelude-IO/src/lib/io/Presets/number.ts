@@ -1,15 +1,6 @@
+import { Predicate } from "prelude-ts";
 import Bus from "../Bus";
-import { IOAccept, IOReject } from "../utils";
-
-const name = "number";
-
-const acceptIfNumber = (input: unknown) =>
-  typeof input === "number"
-    ? IOAccept(input)
-    : IOReject({
-        condition: name,
-        value: input,
-      });
+import any from "./any";
 
 /**
  * A bus that simply checks if the input is a number. Allows `NaN` and `Infinity` to be passed.
@@ -23,8 +14,7 @@ const acceptIfNumber = (input: unknown) =>
  *
  * @group Presets
  */
-export default Bus.create<unknown, number>(
-  name,
-  acceptIfNumber,
-  acceptIfNumber
-);
+export default any.if(
+  "isNumber",
+  Predicate.of((n) => typeof n === "number")
+) as Bus<unknown, number>;
