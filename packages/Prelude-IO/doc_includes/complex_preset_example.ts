@@ -11,4 +11,4 @@ const NestedBus = io.Complex("NestedBus", {
 
 const input = JSON.parse('{ "num": [3, 5, 7], "nest": { "str": "Foo" } }');
 
-console.log(await NestedBus.decode(input)); // IORight containing { num: Vector(3, 5, 7), nest: { str: "Foo" } }
+console.log(await NestedBus.deserialize(input)); // IORight containing { num: Vector(3, 5, 7), nest: { str: "Foo" } }
