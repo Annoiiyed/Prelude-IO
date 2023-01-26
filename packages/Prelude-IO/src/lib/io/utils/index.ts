@@ -2,7 +2,8 @@
  * @module Utilities
  */
 import { Either, Vector } from "prelude-ts";
-import { IOError, IOLeft, IORight } from "./types";
+import { IOError, IOLeft, IORight } from "../types";
+export { default as humanizeErrors } from "./humanizeErrors";
 
 const operators = ["->", "||"];
 

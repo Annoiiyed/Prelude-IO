@@ -34,7 +34,7 @@ describe("io.Vector()", () => {
         value: [1, 2, "3"],
         branches: io
           .IOReject({
-            condition: "Vector(isNumber(any))[2]",
+            condition: "[2]",
             value: "3",
             branches: io
               .IOReject({
@@ -63,7 +63,7 @@ describe("io.Vector()", () => {
         value: Vector.of(1, 2, "3"),
         branches: io
           .IOReject({
-            condition: "Vector(isNumber(any))[2]",
+            condition: "[2]",
             value: "3",
             branches: io
               .IOReject({

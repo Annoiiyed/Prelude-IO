@@ -46,7 +46,7 @@ export default <I, O>(innerBus: Bus<I, O>) => {
         .zipWithIndex()
         .filter(([deserializedInner]) => deserializedInner.isLeft())
         .map(([deserializedInner, index]) => ({
-          condition: `${name}[${index}]`,
+          condition: `[${index}]`,
           value: input[index],
           branches: deserializedInner.getLeftOrThrow(),
         })),
@@ -79,7 +79,7 @@ export default <I, O>(innerBus: Bus<I, O>) => {
         .zipWithIndex()
         .filter(([deserializedInner]) => deserializedInner.isLeft())
         .map(([deserializedInner, index]) => ({
-          condition: `${name}[${index}]`,
+          condition: `[${index}]`,
           value: input.get(index).getOrThrow(),
           branches: deserializedInner.getLeftOrThrow(),
         })),

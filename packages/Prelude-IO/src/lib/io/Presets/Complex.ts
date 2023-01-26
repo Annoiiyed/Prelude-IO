@@ -42,7 +42,7 @@ const rejectMap = <I extends Record<string, unknown>>(
       .toVector()
       .map(([key, result]) => ({
         value: input[key],
-        condition: `${name}.${key}`,
+        condition: key,
         branches: result.getLeftOrThrow(),
       })),
   });
