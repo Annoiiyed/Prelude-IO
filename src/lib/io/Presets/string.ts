@@ -1,28 +1,18 @@
+import { Predicate } from "prelude-ts";
 import Bus from "../Bus";
-import { IOAccept, IOReject } from "../utils";
-
-const name = "string";
-
-const acceptIfString = (input: unknown) =>
-  typeof input === "string"
-    ? IOAccept(input)
-    : IOReject({
-        condition: name,
-        value: input,
-      });
+import any from "./any";
 
 /**
- * A bus that simply checks if the input is a string.
+ * A bus that simply checks if the input is a string. Allows empty strings.
  *
  * @example
  * ```typescript
- * // TODO
+ * [[include:string_preset_example.ts]]
  * ```
  *
  * @group Presets
  */
-export default Bus.create<unknown, string>(
-  name,
-  acceptIfString,
-  acceptIfString
-);
+export default any.if(
+  "isString",
+  Predicate.of((n) => typeof n === "string")
+) as Bus<unknown, string>;
