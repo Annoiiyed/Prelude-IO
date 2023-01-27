@@ -110,6 +110,21 @@ describe("io.Bus", () => {
     );
   });
 
+  it("Acts as an error boundary and always returns an Either", async () => {
+    const throwBus = io.Bus.create<unknown, number>(
+      "ThrowBus",
+      () => {
+        throw new Error();
+      },
+      () => {
+        throw new Error();
+      }
+    );
+
+    expect((await throwBus.deserialize(1)).isLeft()).toBe(true);
+    expect((await throwBus.serialize(1)).isLeft()).toBe(true);
+  });
+
   it("can be joined together", async () => {
     const oneToTwo = io.Bus.create<number, number>(
       "oneToTwo",

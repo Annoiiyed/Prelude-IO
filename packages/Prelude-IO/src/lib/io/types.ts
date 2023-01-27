@@ -11,6 +11,9 @@ export type IOError = {
 
   /** Branches that caused the failure */
   branches?: IOErrors;
+
+  /** A debug message, if needed */
+  message?: string;
 };
 
 /** A vector of IOErrors */

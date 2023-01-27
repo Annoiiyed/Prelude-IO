@@ -39,6 +39,44 @@ describe("io.Complex()", () => {
 
     // @ts-expect-error Testing invalid input
     expect((await TestBus.serialize({ str: 4 })).isLeft()).toBe(true);
+
+    expect(
+      (
+        await NestedBus.deserialize({
+          num: [3, 5, 7],
+          nest: { str: 4 },
+        })
+      ).isLeft()
+    ).toBe(true);
+
+    expect(
+      (
+        await NestedBus.serialize({
+          // @ts-expect-error Testing invalid input
+          num: Vector.of(3, "5", 7),
+          // @ts-expect-error Testing invalid input
+          nest: { str: 4 },
+        })
+      ).isLeft()
+    ).toBe(true);
+
+    // @ts-expect-error Testing invalid input
+    expect((await TestBus.deserialize(undefined)).isLeft()).toBe(true);
+    // @ts-expect-error Testing invalid input
+    expect((await TestBus.deserialize(false)).isLeft()).toBe(true);
+    // @ts-expect-error Testing invalid input
+    expect((await TestBus.deserialize(null)).isLeft()).toBe(true);
+    // @ts-expect-error Testing invalid input
+    expect((await TestBus.deserialize({})).isLeft()).toBe(true);
+
+    // @ts-expect-error Testing invalid input
+    expect((await TestBus.serialize(undefined)).isLeft()).toBe(true);
+    // @ts-expect-error Testing invalid input
+    expect((await TestBus.serialize(false)).isLeft()).toBe(true);
+    // @ts-expect-error Testing invalid input
+    expect((await TestBus.serialize(null)).isLeft()).toBe(true);
+    // @ts-expect-error Testing invalid input
+    expect((await TestBus.serialize({})).isLeft()).toBe(true);
   });
 
   it("Deserializes complex objects when nested", async () => {

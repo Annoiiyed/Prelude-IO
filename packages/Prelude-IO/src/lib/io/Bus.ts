@@ -108,11 +108,30 @@ export default class Bus<I = unknown, O = unknown> {
     deserialize: IOTransformer<I, O> | IOAsyncTransformer<I, O>,
     serialize: IOTransformer<O, I> | IOAsyncTransformer<O, I>
   ): Bus<I, O> {
+    const fallbackRejection = (input: unknown, e: unknown) =>
+      IOReject({
+        condition: name,
+        value: input,
+        message: `Unexpected error: ${e}\n Busses should never throw errors, but instead return a Result!`,
+      });
+
     return new Bus(
       name,
       Option.none(),
-      async (input: I) => deserialize(input),
-      async (input: O) => serialize(input)
+      async (input: I) => {
+        try {
+          return await deserialize(input);
+        } catch (e) {
+          return fallbackRejection(input, e);
+        }
+      },
+      async (input: O) => {
+        try {
+          return await serialize(input);
+        } catch (e) {
+          return fallbackRejection(input, e);
+        }
+      }
     );
   }
 

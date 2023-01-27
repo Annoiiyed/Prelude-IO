@@ -18,7 +18,7 @@ const toValueBusPairs = <I extends Record<string, unknown>>(
   inner: ComplexFields,
   input: I
 ): [unknown, Bus][] =>
-  Object.entries(input).map(([key, value]) => [value, inner[key]]);
+  Object.entries(inner).map(([key, bus]) => [input[key], bus]);
 
 const reformMap = (
   inner: ComplexFields,
@@ -75,6 +75,13 @@ const Complex = <I extends ComplexFields>(
   type Output = ComplexOutput<typeof inner>;
 
   const deserialize = async (input: Input) => {
+    if (typeof input !== "object" || input === null) {
+      return IOReject({
+        condition: name,
+        value: input,
+      });
+    }
+
     const valueBusPairs = toValueBusPairs(inner, input);
 
     const processedInners = await Promise.all(
@@ -91,6 +98,13 @@ const Complex = <I extends ComplexFields>(
   };
 
   const serialize = async (input: Output) => {
+    if (typeof input !== "object" || input === null) {
+      return IOReject({
+        condition: name,
+        value: input,
+      });
+    }
+
     const valueBusPairs = toValueBusPairs(inner, input);
 
     const processedInners = await Promise.all(
