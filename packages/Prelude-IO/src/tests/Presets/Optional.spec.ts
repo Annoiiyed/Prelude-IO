@@ -1,33 +1,39 @@
+import assert from "assert";
 import { Option } from "prelude-ts";
-import * as io from "../../../lib/io";
+import * as io from "../../lib";
 
 describe("io.Optional()", () => {
   it("Deserializes values", async () => {
-    expect(await io.Optional(io.number).deserialize(1)).toEqual(
+    assert.deepEqual(
+      await io.Optional(io.number).deserialize(1),
       io.IOAccept(Option.of(1))
     );
   });
 
   it("Deserializes null", async () => {
-    expect(await io.Optional(io.number).deserialize(null)).toEqual(
+    assert.deepEqual(
+      await io.Optional(io.number).deserialize(null),
       io.IOAccept(Option.none())
     );
   });
 
   it("Serializes values", async () => {
-    expect(await io.Optional(io.number).serialize(Option.of(1))).toEqual(
+    assert.deepEqual(
+      await io.Optional(io.number).serialize(Option.of(1)),
       io.IOAccept(1)
     );
   });
 
   it("Serializes null", async () => {
-    expect(await io.Optional(io.number).serialize(Option.none())).toEqual(
+    assert.deepEqual(
+      await io.Optional(io.number).serialize(Option.none()),
       io.IOAccept(null)
     );
   });
 
   it("Does not deserialize mismatching inners", async () => {
-    expect(await io.Optional(io.number).deserialize("3")).toEqual(
+    assert.deepEqual(
+      await io.Optional(io.number).deserialize("3"),
       io.IOReject({
         condition: "Optional(isNumber(any))",
         value: "3",
@@ -48,8 +54,9 @@ describe("io.Optional()", () => {
   });
 
   it("Does not serialize mismatching inners", async () => {
-    // @ts-expect-error Testing invalid input
-    expect(await io.Optional(io.number).serialize(Option.of("3"))).toEqual(
+    assert.deepEqual(
+      // @ts-expect-error Testing invalid input
+      await io.Optional(io.number).serialize(Option.of("3")),
       io.IOReject({
         condition: "Optional(isNumber(any))",
         value: Option.of("3"),

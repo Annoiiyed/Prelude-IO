@@ -1,6 +1,7 @@
+import assert from "assert";
 import { Vector } from "prelude-ts";
-import * as io from "../../../lib/io";
-import { BusInputType, BusOutputType } from "../../../lib/io";
+import * as io from "../../lib";
+import { BusInputType, BusOutputType } from "../../lib";
 
 describe("io.Complex()", () => {
   const TestBus = io.Complex("TestBus", {
@@ -21,13 +22,14 @@ describe("io.Complex()", () => {
       str: "Foo",
     };
 
-    expect(await TestBus.deserialize(input)).toEqual(io.IOAccept(output));
+    assert.deepEqual(await TestBus.deserialize(input), io.IOAccept(output));
   });
 
   it("Works with freshly deserialized JSON", async () => {
     const json = JSON.parse('{"str": "Foo"}');
 
-    expect(await TestBus.deserialize(json)).toEqual(
+    assert.deepEqual(
+      await TestBus.deserialize(json),
       io.IOAccept({
         str: "Foo",
       })
@@ -35,21 +37,21 @@ describe("io.Complex()", () => {
   });
 
   it("Deep rejects mismatching fields", async () => {
-    expect((await TestBus.deserialize({ str: 4 })).isLeft()).toBe(true);
+    assert.ok((await TestBus.deserialize({ str: 4 })).isLeft());
 
     // @ts-expect-error Testing invalid input
-    expect((await TestBus.serialize({ str: 4 })).isLeft()).toBe(true);
+    assert.ok((await TestBus.serialize({ str: 4 })).isLeft());
 
-    expect(
+    assert.ok(
       (
         await NestedBus.deserialize({
           num: [3, 5, 7],
           nest: { str: 4 },
         })
       ).isLeft()
-    ).toBe(true);
+    );
 
-    expect(
+    assert.ok(
       (
         await NestedBus.serialize({
           // @ts-expect-error Testing invalid input
@@ -58,34 +60,29 @@ describe("io.Complex()", () => {
           nest: { str: 4 },
         })
       ).isLeft()
-    ).toBe(true);
+    );
 
+    assert.ok((await TestBus.deserialize(undefined)).isLeft());
     // @ts-expect-error Testing invalid input
-    expect((await TestBus.deserialize(undefined)).isLeft()).toBe(true);
+    assert.ok((await TestBus.deserialize(false)).isLeft());
+    assert.ok((await TestBus.deserialize(null)).isLeft());
     // @ts-expect-error Testing invalid input
-    expect((await TestBus.deserialize(false)).isLeft()).toBe(true);
-    // @ts-expect-error Testing invalid input
-    expect((await TestBus.deserialize(null)).isLeft()).toBe(true);
-    // @ts-expect-error Testing invalid input
-    expect((await TestBus.deserialize({})).isLeft()).toBe(true);
+    assert.ok((await TestBus.deserialize({})).isLeft());
 
+    assert.ok((await TestBus.serialize(undefined)).isLeft());
     // @ts-expect-error Testing invalid input
-    expect((await TestBus.serialize(undefined)).isLeft()).toBe(true);
+    assert.ok((await TestBus.serialize(false)).isLeft());
+    assert.ok((await TestBus.serialize(null)).isLeft());
     // @ts-expect-error Testing invalid input
-    expect((await TestBus.serialize(false)).isLeft()).toBe(true);
-    // @ts-expect-error Testing invalid input
-    expect((await TestBus.serialize(null)).isLeft()).toBe(true);
-    // @ts-expect-error Testing invalid input
-    expect((await TestBus.serialize({})).isLeft()).toBe(true);
+    assert.ok((await TestBus.serialize({})).isLeft());
   });
 
   it("Deserializes complex objects when nested", async () => {
-    expect(
+    assert.deepEqual(
       await NestedBus.deserialize({
         num: [3, 5, 7],
         nest: { str: "Foo" },
-      })
-    ).toEqual(
+      }),
       io.IOAccept<BusOutputType<typeof NestedBus>>({
         num: Vector.of(3, 5, 7),
         nest: {
@@ -96,14 +93,13 @@ describe("io.Complex()", () => {
   });
 
   it("Serializes complex objects", async () => {
-    expect(
+    assert.deepEqual(
       await NestedBus.serialize({
         num: Vector.of(3, 5, 7),
         nest: {
           str: "Foo",
         },
-      })
-    ).toEqual(
+      }),
       io.IOAccept<BusInputType<typeof NestedBus>>({
         num: [3, 5, 7],
         nest: { str: "Foo" },

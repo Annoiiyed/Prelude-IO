@@ -1,6 +1,6 @@
 {
   "entryPoints": [
-    "./src/lib/io/index.ts"
+    "./src/lib/index.ts"
   ],
   "excludeInternal": true,
   "categorizeByGroup": true,

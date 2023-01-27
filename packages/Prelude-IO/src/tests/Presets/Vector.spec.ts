@@ -1,34 +1,39 @@
+import assert from "assert";
 import { Vector } from "prelude-ts";
-import * as io from "../../../lib/io";
+import * as io from "../../lib";
 
 describe("io.Vector()", () => {
   it("Deserializes arrays", async () => {
-    expect(await io.Vector(io.number).deserialize([1, 2, 3])).toEqual(
+    assert.deepEqual(
+      await io.Vector(io.number).deserialize([1, 2, 3]),
       io.IOAccept(Vector.of(1, 2, 3))
     );
   });
 
   it("Serializes arrays", async () => {
-    expect(await io.Vector(io.number).serialize(Vector.of(1, 2, 3))).toEqual(
+    assert.deepEqual(
+      await io.Vector(io.number).serialize(Vector.of(1, 2, 3)),
       io.IOAccept([1, 2, 3])
     );
   });
 
   it("Deserializes empty arrays", async () => {
-    expect(
+    assert.ok(
       // @ts-expect-error Testing unknown input
       (await io.Vector(io.number).deserialize([])).getOrThrow().isEmpty()
-    ).toBe(true);
+    );
   });
 
   it("Serializes empty arrays", async () => {
-    expect(await io.Vector(io.number).serialize(Vector.empty())).toEqual(
+    assert.deepEqual(
+      await io.Vector(io.number).serialize(Vector.empty()),
       io.IOAccept([])
     );
   });
 
   it("Does not deserialize mismatching inners", async () => {
-    expect(await io.Vector(io.number).deserialize([1, 2, "3"])).toEqual(
+    assert.deepEqual(
+      await io.Vector(io.number).deserialize([1, 2, "3"]),
       io.IOReject({
         condition: "Vector(isNumber(any))",
         value: [1, 2, "3"],
@@ -55,8 +60,9 @@ describe("io.Vector()", () => {
   });
 
   it("Does not serialize mismatching inners", async () => {
-    // @ts-expect-error Testing invalid input
-    expect(await io.Vector(io.number).serialize(Vector.of(1, 2, "3"))).toEqual(
+    assert.deepEqual(
+      // @ts-expect-error Testing invalid input
+      await io.Vector(io.number).serialize(Vector.of(1, 2, "3")),
       io.IOReject({
         condition: "Vector(isNumber(any))",
         // @ts-expect-error Testing invalid input

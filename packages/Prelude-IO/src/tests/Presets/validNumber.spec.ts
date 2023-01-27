@@ -1,10 +1,13 @@
-import * as io from "../../../lib/io";
-import { IOReject } from "../../../lib/io";
+import assert from "assert";
+import * as io from "../../lib";
+import { IOReject } from "../../lib";
 
 describe("io.validNumber", () => {
   it("deserializes/serializes values, returning IOLeft on invalid numbers", async () => {
-    expect(await io.validNumber.deserialize(0)).toEqual(io.IOAccept(0));
-    expect(await io.validNumber.deserialize("foo bar")).toEqual(
+    assert.deepEqual(await io.validNumber.deserialize(0), io.IOAccept(0));
+
+    assert.deepEqual(
+      await io.validNumber.deserialize("foo bar"),
       io.IOReject({
         condition: "isNumber(any)",
         value: "foo bar",
@@ -14,7 +17,9 @@ describe("io.validNumber", () => {
         }).getLeft(),
       })
     );
-    expect(await io.validNumber.deserialize(NaN)).toEqual(
+
+    assert.deepEqual(
+      await io.validNumber.deserialize(NaN),
       io.IOReject({
         condition: "isValidNumber(isNumber(any))",
         value: NaN,
@@ -24,7 +29,9 @@ describe("io.validNumber", () => {
         }).getLeft(),
       })
     );
-    expect(await io.validNumber.deserialize(Infinity)).toEqual(
+
+    assert.deepEqual(
+      await io.validNumber.deserialize(Infinity),
       io.IOReject({
         condition: "isValidNumber(isNumber(any))",
         value: Infinity,

@@ -1,33 +1,21 @@
+import assert from "assert";
 import { Either, Vector, Predicate } from "prelude-ts";
-import * as io from "../../lib/io";
-import { IOAccept, IOReject } from "../../lib/io";
+import * as io from "../lib";
+import { IOAccept, IOReject } from "../lib";
 
 describe("io.Bus", () => {
   it("can be chained together", async () => {
-    const numberToTwiceThat: io.IOTransformer<number, number> = jest
-      .fn()
-      .mockImplementation((n) => Either.right(n * 2));
-
-    const numberToHalfThat: io.IOTransformer<number, number> = jest
-      .fn()
-      .mockImplementation((n) => Either.right(n / 2));
-
     const double = io.Bus.create<number, number>(
       "numberToTwiceThat",
-      numberToTwiceThat,
-      numberToHalfThat
+      (n) => Either.right(n * 2),
+      (n) => Either.right(n / 2)
     );
 
     const tripleChainedBus = double.chain(double).chain(double);
 
-    expect((await tripleChainedBus.deserialize(1)).getOrThrow()).toEqual(8);
+    assert.deepEqual((await tripleChainedBus.deserialize(1)).getOrThrow(), 8);
 
-    expect(numberToTwiceThat).toHaveBeenCalledTimes(3);
-    expect(numberToHalfThat).toHaveBeenCalledTimes(0);
-
-    expect((await tripleChainedBus.serialize(8)).getOrThrow()).toEqual(1);
-
-    expect(numberToHalfThat).toHaveBeenCalledTimes(3);
+    assert.deepEqual((await tripleChainedBus.serialize(8)).getOrThrow(), 1);
   });
 
   it("fails if a bus in a chain fails", async () => {
@@ -44,7 +32,8 @@ describe("io.Bus", () => {
 
     const middleWillFail = willPass.chain(willFail).chain(willPass);
 
-    expect(await middleWillFail.deserialize(1)).toEqual(
+    assert.deepEqual(
+      await middleWillFail.deserialize(1),
       io.IOReject({
         condition: "(willPass -> willFail) -> willPass",
         value: 1,
@@ -70,8 +59,12 @@ describe("io.Bus", () => {
     const isValid = isNaN.negate().and(isFinite);
     const stringToValidNumber = stringToNumber.if("isValid", isValid);
 
-    expect(await stringToValidNumber.deserialize("1")).toEqual(Either.right(1));
-    expect(await stringToValidNumber.deserialize("one")).toEqual(
+    assert.deepEqual(
+      await stringToValidNumber.deserialize("1"),
+      Either.right(1)
+    );
+    assert.deepEqual(
+      await stringToValidNumber.deserialize("one"),
       io.IOReject({
         condition: "isValid(stringToNumber)",
         value: "one",
@@ -85,8 +78,12 @@ describe("io.Bus", () => {
     const isEven = Predicate.of<number>((n) => n % 2 === 0);
     const stringToEvenNumber = stringToValidNumber.if("isEven", isEven);
 
-    expect(await stringToEvenNumber.deserialize("2")).toEqual(Either.right(2));
-    expect(await stringToEvenNumber.deserialize("3")).toEqual(
+    assert.deepEqual(
+      await stringToEvenNumber.deserialize("2"),
+      Either.right(2)
+    );
+    assert.deepEqual(
+      await stringToEvenNumber.deserialize("3"),
       io.IOReject({
         condition: "isEven(isValid(stringToNumber))",
         value: "3",
@@ -97,8 +94,9 @@ describe("io.Bus", () => {
       })
     );
 
-    expect(await stringToEvenNumber.serialize(2)).toEqual(Either.right("2"));
-    expect(await stringToEvenNumber.serialize(3)).toEqual(
+    assert.deepEqual(await stringToEvenNumber.serialize(2), Either.right("2"));
+    assert.deepEqual(
+      await stringToEvenNumber.serialize(3),
       io.IOReject({
         condition: "isEven(isValid(stringToNumber))",
         value: 3,
@@ -121,8 +119,8 @@ describe("io.Bus", () => {
       }
     );
 
-    expect((await throwBus.deserialize(1)).isLeft()).toBe(true);
-    expect((await throwBus.serialize(1)).isLeft()).toBe(true);
+    assert.ok((await throwBus.deserialize(1)).isLeft());
+    assert.ok((await throwBus.serialize(1)).isLeft());
   });
 
   it("can be joined together", async () => {
@@ -144,11 +142,12 @@ describe("io.Bus", () => {
 
     const joined = oneToTwo.else(fourToFive);
 
-    expect(await joined.deserialize(1)).toEqual(IOAccept(2));
-    expect(await joined.deserialize(4)).toEqual(IOAccept(5));
-    expect(await joined.serialize(2)).toEqual(IOAccept(1));
-    expect(await joined.serialize(5)).toEqual(IOAccept(4));
-    expect(await joined.deserialize(3)).toEqual(
+    assert.deepEqual(await joined.deserialize(1), IOAccept(2));
+    assert.deepEqual(await joined.deserialize(4), IOAccept(5));
+    assert.deepEqual(await joined.serialize(2), IOAccept(1));
+    assert.deepEqual(await joined.serialize(5), IOAccept(4));
+    assert.deepEqual(
+      await joined.deserialize(3),
       IOReject({
         condition: "oneToTwo | fourToFive",
         value: 3,
@@ -164,7 +163,8 @@ describe("io.Bus", () => {
         ),
       })
     );
-    expect(await joined.serialize(3)).toEqual(
+    assert.deepEqual(
+      await joined.serialize(3),
       IOReject({
         condition: "oneToTwo | fourToFive",
         value: 3,

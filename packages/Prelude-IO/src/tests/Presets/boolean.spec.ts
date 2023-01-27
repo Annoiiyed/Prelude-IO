@@ -1,10 +1,14 @@
-import * as io from "../../../lib/io";
+import assert from "assert";
+import * as io from "../../lib";
 
 describe("io.number", () => {
   it("deserializes/serializes values, returning IOLeft on non-booleans", async () => {
-    expect(await io.boolean.deserialize(true)).toEqual(io.IOAccept(true));
-    expect(await io.boolean.serialize(true)).toEqual(io.IOAccept(true));
-    expect(await io.boolean.deserialize("true")).toEqual(
+    assert.deepEqual(await io.boolean.deserialize(true), io.IOAccept(true));
+
+    assert.deepEqual(await io.boolean.serialize(true), io.IOAccept(true));
+
+    assert.deepEqual(
+      await io.boolean.deserialize("true"),
       io.IOReject({
         condition: "isBoolean(any)",
         value: "true",
@@ -16,8 +20,10 @@ describe("io.number", () => {
           .getLeft(),
       })
     );
-    // @ts-expect-error Testing invalid input
-    expect(await io.boolean.serialize("true")).toEqual(
+
+    assert.deepEqual(
+      // @ts-expect-error Testing invalid input
+      await io.boolean.serialize("true"),
       io.IOReject({
         condition: "isBoolean(any)",
         value: "true",

@@ -11,7 +11,7 @@ Prelude-IO's base unit is the `Bus<I, O>` class, which provides basic functional
 Examples can be found [here][examples]. Alternatively, here's an overview of some basic functionality: 
 
 ```typescript
-import * as io from "@prelude-io/core";
+import * as io from "prelude-io";
 import { Predicate } from "prelude-ts";
 
 // Conditional types
@@ -49,21 +49,26 @@ fetch("http://example.com/hotels.json")
   });
 ```
 
+### Installation
+
+```
+npm install --save @prelude-io/core prelude-ts
+```
+
 ### Principles
 - Busses split parsing and conditional logic into seperate functions
 - IO returns `Either` objects rather than throw exceptions
 - Functions can be `chain`ed or turned into a `union`
 
 ## Roadmap
-
+- Documentation site through typedoc
 - Add extra commonly used types
 - **`@prelude-io/fetch`**: A library providing automatic parsing of HTTP requests and responses
 - **`@prelude-io/test`**: A set of functions to run basic tests on your data types
 
 ## Inspirations
-
-- [Prelude-ts]\: Provides functional programming concepts in an accessible manner
-- [io-ts](https://github.com/gcanti/io-ts): Runtime type checking, encoding and decoding, based on `fp-ts`
+- [Prelude-ts]\: Provides functional programming concepts in an accessible manner. Though a similar name, this project is not directly affiliated with prelude-ts or its authors.
+- [io-ts](https://github.com/gcanti/io-ts): Runtime type checking, encoding and decoding, based on `fp-ts`.
 
 [Prelude-ts]: https://github.com/emmanueltouzery/prelude-ts
 [Examples]: https://github.com/Annoiiyed/Prelude-IO/tree/main/examples

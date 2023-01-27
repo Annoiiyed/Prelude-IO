@@ -1,12 +1,14 @@
-import * as io from "../../../lib/io";
+import assert from "assert";
+import * as io from "../../lib";
 
 describe("io.number", () => {
   it("deserializes/serializes values, returning IOLeft on non-numbers", async () => {
-    expect(await io.number.deserialize(123)).toEqual(io.IOAccept(123));
+    assert.deepEqual(await io.number.deserialize(123), io.IOAccept(123));
 
-    expect(await io.number.serialize(123)).toEqual(io.IOAccept(123));
+    assert.deepEqual(await io.number.serialize(123), io.IOAccept(123));
 
-    expect(await io.number.deserialize("foo bar baz")).toEqual(
+    assert.deepEqual(
+      await io.number.deserialize("foo bar baz"),
       io.IOReject({
         condition: "isNumber(any)",
         value: "foo bar baz",
@@ -19,8 +21,9 @@ describe("io.number", () => {
       })
     );
 
-    // @ts-expect-error Testing invalid input
-    expect(await io.number.serialize("foo bar baz")).toEqual(
+    assert.deepEqual(
+      // @ts-expect-error Testing invalid input
+      await io.number.serialize("foo bar baz"),
       io.IOReject({
         condition: "isNumber(any)",
         value: "foo bar baz",
@@ -33,7 +36,8 @@ describe("io.number", () => {
       })
     );
 
-    expect(await io.number.deserialize(null)).toEqual(
+    assert.deepEqual(
+      await io.number.deserialize(null),
       io.IOReject({
         condition: "isNumber(any)",
         value: null,
