@@ -1,6 +1,6 @@
 {
   "name": "@prelude-io/core",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "Type-save runtime IO library based on PreludeTS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,12 +9,14 @@
   ],
   "scripts": {
     "test": "mocha",
+    "prepack": "rm -rf ./dist && tsc",
+    "prepublishOnly": "mocha && eslint ./src",
     "prepare": "husky install",
     "docs:update": "typedoc --validation"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Annoiiyed/PreludeIO.git"
+    "url": "git+https://github.com/Annoiiyed/Prelude-IO.git"
   },
   "keywords": [
     "functional-programming",
@@ -28,9 +30,9 @@
   },
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Annoiiyed/PreludeIO/issues"
+    "url": "https://github.com/Annoiiyed/Prelude-IO/issues"
   },
-  "homepage": "https://github.com/Annoiiyed/PreludeIO#readme",
+  "homepage": "https://github.com/Annoiiyed/Prelude-IO#readme",
   "devDependencies": {
     "@tsconfig/node18": "1.0.1",
     "@types/mocha": "^10.0.1",

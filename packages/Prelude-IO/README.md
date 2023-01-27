@@ -61,6 +61,7 @@ npm install --save @prelude-io/core prelude-ts
 - Functions can be `chain`ed or turned into a `union`
 
 ## Roadmap
+- Optional support for `HasEquals` on complex data types
 - Documentation site through typedoc
 - Add extra commonly used types
 - **`@prelude-io/fetch`**: A library providing automatic parsing of HTTP requests and responses

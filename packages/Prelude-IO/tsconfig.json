@@ -2,7 +2,6 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es5",
-        "sourceMap": true,
         "declaration": true,
         "noImplicitAny": true,
         "esModuleInterop": true,
@@ -11,6 +10,7 @@
     "exclude": [
         "node_modules",
         "examples",
+        "**/*.spec.ts"
     ],
     "include": [
         "./src/"
