@@ -10,6 +10,9 @@ import { HasEquals, Lazy } from "prelude-ts";
  * @param equals The equality function
  * @param hashCode The hash code function
  *
+ * @param equals.__type A comparison function
+ * @param hashCode.__type A hashcode generating function
+ *
  * @returns The data object with equality added
  */
 export default function <D extends Record<string, unknown>>(

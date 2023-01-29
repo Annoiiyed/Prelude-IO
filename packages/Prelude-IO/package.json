@@ -41,6 +41,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.3",
     "mocha": "^10.2.0",
+    "mocha-junit-reporter": "^2.2.0",
+    "mocha-multi": "^1.1.7",
     "nyc": "^15.1.0",
     "prettier": "^2.8.3",
     "ts-node": "^10.9.1",
@@ -79,9 +81,12 @@
   },
   "nyc": {
     "all": true,
+    "check-coverage": true,
     "include": [
       "src/lib/**/*.ts"
     ],
-    "reporter": "lcov"
+    "reporter": "lcov",
+    "statements": 100,
+    "lines": 100
   }
 }

@@ -1,0 +1,35 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@4.7
+
+jobs:
+  eslint:
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - checkout
+      - node/install
+      - node/install-packages
+      - run: ./node_modules/.bin/eslint ./src/
+  typedoc:
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - checkout
+      - node/install
+      - node/install-packages
+      - run: ./node_modules/.bin/typedoc --validation --treatWarningsAsErrors --emit none
+
+workflows:
+  test:
+    jobs:
+      - eslint
+      - typedoc
+      - node/test:
+          matrix:
+            parameters:
+              version:
+                - "18.13"
+                - "16.19"
+          pkg-manager: npm
