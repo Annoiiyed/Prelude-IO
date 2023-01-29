@@ -4,6 +4,7 @@
 import { Either, Vector } from "prelude-ts";
 import { IOError, IOLeft, IORight } from "../types";
 export { default as humanizeErrors } from "./humanizeErrors";
+export { default as addEquality } from "./addEquality";
 
 const operators = ["->", "||"];
 

@@ -8,9 +8,9 @@
     "/dist"
   ],
   "scripts": {
-    "test": "mocha",
+    "test": "nyc mocha",
     "prepack": "rm -rf ./dist && tsc",
-    "prepublishOnly": "mocha && eslint ./src",
+    "prepublishOnly": "npm test && eslint ./src",
     "prepare": "husky install",
     "docs:update": "typedoc --validation"
   },
@@ -41,6 +41,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.3",
     "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
     "prettier": "^2.8.3",
     "ts-node": "^10.9.1",
     "typedoc": "^0.23.24",
@@ -75,5 +76,12 @@
     "rules": {
       "prettier/prettier": "error"
     }
+  },
+  "nyc": {
+    "all": true,
+    "include": [
+      "src/lib/**/*.ts"
+    ],
+    "reporter": "lcov"
   }
 }

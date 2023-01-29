@@ -3,3 +3,4 @@ dist/
 .vscode/
 coverage/
 docs/
+.nyc_output/

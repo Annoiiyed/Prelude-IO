@@ -6,7 +6,8 @@ import { BusInputType, BusOutputType } from "../../lib";
 describe("io.Complex()", () => {
   const TestBus = io.Complex("TestBus", {
     str: io.string,
-  });
+    // Testing a lot of invalid input, so we need to disable the type checker
+  }) as io.Bus;
 
   const NestedBus = io.Complex("NestedBus", {
     num: io.Vector(io.number),
@@ -39,7 +40,6 @@ describe("io.Complex()", () => {
   it("Deep rejects mismatching fields", async () => {
     assert.ok((await TestBus.deserialize({ str: 4 })).isLeft());
 
-    // @ts-expect-error Testing invalid input
     assert.ok((await TestBus.serialize({ str: 4 })).isLeft());
 
     assert.ok(
@@ -56,24 +56,19 @@ describe("io.Complex()", () => {
         await NestedBus.serialize({
           // @ts-expect-error Testing invalid input
           num: Vector.of(3, "5", 7),
-          // @ts-expect-error Testing invalid input
           nest: { str: 4 },
         })
       ).isLeft()
     );
 
     assert.ok((await TestBus.deserialize(undefined)).isLeft());
-    // @ts-expect-error Testing invalid input
     assert.ok((await TestBus.deserialize(false)).isLeft());
     assert.ok((await TestBus.deserialize(null)).isLeft());
-    // @ts-expect-error Testing invalid input
     assert.ok((await TestBus.deserialize({})).isLeft());
 
     assert.ok((await TestBus.serialize(undefined)).isLeft());
-    // @ts-expect-error Testing invalid input
     assert.ok((await TestBus.serialize(false)).isLeft());
     assert.ok((await TestBus.serialize(null)).isLeft());
-    // @ts-expect-error Testing invalid input
     assert.ok((await TestBus.serialize({})).isLeft());
   });
 
