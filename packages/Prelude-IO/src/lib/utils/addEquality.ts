@@ -5,6 +5,15 @@ import { HasEquals, Lazy } from "prelude-ts";
  * Adds equality functions to a data object. This freezes an object.
  * HashCode is lazily evaluated and memoized.
  *
+ * This function also acts as an error boundary; you may assume both arguments
+ * for equals() are of the same type as the data object, any exceptions thrown
+ * by the equality function will be caught and treated as false.
+ *
+ * @example
+ * ```typescript
+ * [[include:examples/add_equality_example.ts]]
+ * ```
+ *
  * @param <D> The type of the data object
  * @param data The data object to add equality to
  * @param equals The equality function

@@ -8,6 +8,11 @@ import Complex from "./Complex";
  * @param fields The fields to include in the partial
  * @param name An alias for this bus. Defaults to `Partial(ComplexName[field, field, ...])`
  *
+ * @example
+ * ```typescript
+ * [[include:partial_preset_example.ts]]
+ * ```
+ *
  * @returns The partial bus
  * @group Presets
  */
