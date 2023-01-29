@@ -11,7 +11,7 @@ import { HasEquals, Lazy } from "prelude-ts";
  *
  * @example
  * ```typescript
- * [[include:examples/add_equality_example.ts]]
+ * [[include:add_equality_example.ts]]
  * ```
  *
  * @param <D> The type of the data object
