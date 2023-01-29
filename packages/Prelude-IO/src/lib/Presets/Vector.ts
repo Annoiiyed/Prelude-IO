@@ -86,5 +86,5 @@ export default <I, O>(innerBus: Bus<I, O>) => {
     });
   };
 
-  return Bus.create<I[], Vector<O>>(name, deserialize, serialize);
+  return Bus.create<I[], Vector<O>>(name, deserialize, serialize, innerBus);
 };

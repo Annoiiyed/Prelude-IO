@@ -1,5 +1,5 @@
 import { Option, Predicate } from "prelude-ts";
-import { IOTransformer, IOAsyncTransformer } from "./types";
+import { IOTransformer, IOAsyncTransformer, ComplexFields } from "./types";
 import { IOReject, mergeNames } from "./utils";
 
 const chainTransformers =
@@ -90,7 +90,9 @@ export default class Bus<I = unknown, O = unknown> {
     /** A async deserialization function */
     public readonly deserialize: IOAsyncTransformer<I, O>,
     /** A async serialization function */
-    public readonly serialize: IOAsyncTransformer<O, I>
+    public readonly serialize: IOAsyncTransformer<O, I>,
+    /** Contains the inner bus if this bus is a wrapper around other busses */
+    public readonly inner: Bus | [Bus, Bus] | ComplexFields = null
   ) {
     Object.freeze(this);
   }
@@ -106,7 +108,8 @@ export default class Bus<I = unknown, O = unknown> {
   static create<I, O>(
     name: string,
     deserialize: IOTransformer<I, O> | IOAsyncTransformer<I, O>,
-    serialize: IOTransformer<O, I> | IOAsyncTransformer<O, I>
+    serialize: IOTransformer<O, I> | IOAsyncTransformer<O, I>,
+    inner: Bus["inner"] = null
   ): Bus<I, O> {
     const fallbackRejection = (input: unknown, e: unknown) =>
       IOReject({
@@ -131,7 +134,8 @@ export default class Bus<I = unknown, O = unknown> {
         } catch (e) {
           return fallbackRejection(input, e);
         }
-      }
+      },
+      inner
     );
   }
 
@@ -156,7 +160,8 @@ export default class Bus<I = unknown, O = unknown> {
       name,
       Option.none(),
       elseTransformers(name, this.deserialize, other.deserialize),
-      elseTransformers(name, this.serialize, other.serialize)
+      elseTransformers(name, this.serialize, other.serialize),
+      [this, other]
     );
   }
 
@@ -181,7 +186,8 @@ export default class Bus<I = unknown, O = unknown> {
       name,
       Option.none(),
       chainTransformers(name, this.deserialize, other.deserialize),
-      chainTransformers(name, other.serialize, this.serialize)
+      chainTransformers(name, other.serialize, this.serialize),
+      [this, other]
     );
   }
 
@@ -247,7 +253,8 @@ export default class Bus<I = unknown, O = unknown> {
       newBusName,
       Option.of(predicate),
       newDeserialize,
-      newserialize
+      newserialize,
+      this
     );
   }
 }

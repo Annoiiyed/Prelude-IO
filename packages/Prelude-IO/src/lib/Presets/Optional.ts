@@ -45,6 +45,7 @@ export default <I, O>(innerBus: Bus<I, O>) => {
               branches: branches,
             }).getLeft()
           ) as IOResult<I>);
-    }
+    },
+    innerBus
   );
 };

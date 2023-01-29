@@ -69,10 +69,10 @@ const acceptMap = <D extends ComplexInput<ComplexFields>>(
  */
 const Complex = <I extends ComplexFields>(
   name: string,
-  inner: I
-): ComplexBus<typeof inner> => {
-  type Input = ComplexInput<typeof inner>;
-  type Output = ComplexOutput<typeof inner>;
+  innerBusses: I
+): ComplexBus<typeof innerBusses> => {
+  type Input = ComplexInput<typeof innerBusses>;
+  type Output = ComplexOutput<typeof innerBusses>;
 
   const deserialize = async (input: Input) => {
     if (typeof input !== "object" || input === null) {
@@ -82,13 +82,13 @@ const Complex = <I extends ComplexFields>(
       });
     }
 
-    const valueBusPairs = toValueBusPairs(inner, input);
+    const valueBusPairs = toValueBusPairs(innerBusses, input);
 
     const processedInners = await Promise.all(
       valueBusPairs.map(deserializeInput)
     ).then(Vector.ofIterable);
 
-    const map = reformMap(inner, processedInners);
+    const map = reformMap(innerBusses, processedInners);
 
     return (
       map.anyMatch((_, r) => r.isLeft())
@@ -105,13 +105,13 @@ const Complex = <I extends ComplexFields>(
       });
     }
 
-    const valueBusPairs = toValueBusPairs(inner, input);
+    const valueBusPairs = toValueBusPairs(innerBusses, input);
 
     const processedInners = await Promise.all(
       valueBusPairs.map(serializeInput)
     ).then(Vector.ofIterable);
 
-    const map = reformMap(inner, processedInners);
+    const map = reformMap(innerBusses, processedInners);
 
     return (
       map.anyMatch((_, r) => r.isLeft())
@@ -120,7 +120,12 @@ const Complex = <I extends ComplexFields>(
     ) as IOResult<Input>;
   };
 
-  return Bus.create<Input, Output>(name, deserialize, serialize);
+  return Bus.create<Input, Output>(
+    name,
+    deserialize,
+    serialize,
+    innerBusses as ComplexFields
+  );
 };
 
 export default Complex;
