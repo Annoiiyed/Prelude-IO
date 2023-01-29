@@ -1,5 +1,8 @@
 # Prelude-IO
 
+[![npm version](https://badge.fury.io/js/@prelude-io%2Fcore.svg)](https://badge.fury.io/js/@prelude-io%2Fcore)
+[![documentation](https://img.shields.io/badge/Documentation-blue)](https://annoiiyed.github.io/Prelude-IO/)
+
 This library aims to provide easy to use run- and compiletime type-safety combined with the benefits of immutability through [Prelude-ts].
 
 Interop with Prelude-ts is a key feature of this library, but not strictly required for operation. 
@@ -49,6 +52,10 @@ fetch("http://example.com/hotels.json")
   });
 ```
 
+### Documentation
+
+You can read typedoc documentation [here](https://annoiiyed.github.io/Prelude-IO/)
+
 ### Installation
 
 ```
@@ -61,8 +68,6 @@ npm install --save @prelude-io/core prelude-ts
 - Functions can be `chain`ed or turned into a `union`
 
 ## Roadmap
-- Optional support for `HasEquals` on complex data types
-- Documentation site through typedoc
 - Add extra commonly used types
 - **`@prelude-io/fetch`**: A library providing automatic parsing of HTTP requests and responses
 - **`@prelude-io/test`**: A set of functions to run basic tests on your data types
