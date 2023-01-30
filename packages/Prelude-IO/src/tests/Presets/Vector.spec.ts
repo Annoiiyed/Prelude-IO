@@ -3,37 +3,37 @@ import { Vector } from "prelude-ts";
 import * as io from "../../lib";
 
 describe("io.Vector()", () => {
-  it("Deserializes arrays", async () => {
+  it("Deserializes arrays", () => {
     assert.deepEqual(
-      await io.Vector(io.number).deserialize([1, 2, 3]),
+      io.Vector(io.number).deserialize([1, 2, 3]),
       io.IOAccept(Vector.of(1, 2, 3))
     );
   });
 
-  it("Serializes arrays", async () => {
+  it("Serializes arrays", () => {
     assert.deepEqual(
-      await io.Vector(io.number).serialize(Vector.of(1, 2, 3)),
+      io.Vector(io.number).serialize(Vector.of(1, 2, 3)),
       io.IOAccept([1, 2, 3])
     );
   });
 
-  it("Deserializes empty arrays", async () => {
+  it("Deserializes empty arrays", () => {
     assert.ok(
       // @ts-expect-error Testing unknown input
-      (await io.Vector(io.number).deserialize([])).getOrThrow().isEmpty()
+      io.Vector(io.number).deserialize([]).getOrThrow().isEmpty()
     );
   });
 
-  it("Serializes empty arrays", async () => {
+  it("Serializes empty arrays", () => {
     assert.deepEqual(
-      await io.Vector(io.number).serialize(Vector.empty()),
+      io.Vector(io.number).serialize(Vector.empty()),
       io.IOAccept([])
     );
   });
 
-  it("Does not deserialize mismatching inners", async () => {
+  it("Does not deserialize mismatching inners", () => {
     assert.deepEqual(
-      await io.Vector(io.number).deserialize([1, 2, "3"]),
+      io.Vector(io.number).deserialize([1, 2, "3"]),
       io.IOReject({
         condition: "Vector(isNumber(any))",
         value: [1, 2, "3"],
@@ -59,10 +59,10 @@ describe("io.Vector()", () => {
     );
   });
 
-  it("Does not serialize mismatching inners", async () => {
+  it("Does not serialize mismatching inners", () => {
     assert.deepEqual(
       // @ts-expect-error Testing invalid input
-      await io.Vector(io.number).serialize(Vector.of(1, 2, "3")),
+      io.Vector(io.number).serialize(Vector.of(1, 2, "3")),
       io.IOReject({
         condition: "Vector(isNumber(any))",
         // @ts-expect-error Testing invalid input

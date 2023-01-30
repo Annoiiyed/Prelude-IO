@@ -39,7 +39,7 @@ const hotelType = io.Complex("Hotel", {
 // Deserialising
 fetch("http://example.com/hotels.json")
   .then(response => response.json())
-  // Asynchronous (de)serialising
+  // (de)serialising
   .then(HotelType.deserialise)
   .then(hotel => {
     // Either-based error handling

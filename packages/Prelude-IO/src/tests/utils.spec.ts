@@ -17,10 +17,10 @@ describe("io.addEquality()", () => {
     str: io.string,
   });
 
-  it("adds equality to a data structure", async () => {
-    const data = (
-      await TestBus.deserialize({ str: "Foo" })
-    ).getOrThrow() as io.BusOutputType<typeof TestBus>;
+  it("adds equality to a data structure", () => {
+    const data = TestBus.deserialize({
+      str: "Foo",
+    }).getOrThrow() as io.BusOutputType<typeof TestBus>;
 
     assert.ok(
       io
@@ -33,12 +33,12 @@ describe("io.addEquality()", () => {
     );
   });
 
-  it("adds lazily executes the hashcode function, which is memoized", async () => {
+  it("adds lazily executes the hashcode function, which is memoized", () => {
     let counterRef = 0;
 
-    const data = (
-      await TestBus.deserialize({ str: "Foo" })
-    ).getOrThrow() as io.BusOutputType<typeof TestBus>;
+    const data = TestBus.deserialize({
+      str: "Foo",
+    }).getOrThrow() as io.BusOutputType<typeof TestBus>;
 
     const dataWithEq = io.addEquality(
       data,
@@ -55,10 +55,10 @@ describe("io.addEquality()", () => {
     assert.equal(counterRef, 1);
   });
 
-  it("catches type errors in equality function hidden by our type overloading", async () => {
-    const data = (
-      await TestBus.deserialize({ str: "Foo" })
-    ).getOrThrow() as io.BusOutputType<typeof TestBus>;
+  it("catches type errors in equality function hidden by our type overloading", () => {
+    const data = TestBus.deserialize({
+      str: "Foo",
+    }).getOrThrow() as io.BusOutputType<typeof TestBus>;
 
     const dataWithEq = io.addEquality(
       data,
@@ -72,10 +72,10 @@ describe("io.addEquality()", () => {
     assert.ok(!dataWithEq.equals({ str: "Foo" }));
   });
 
-  it("validates through Prelude's hasEquals() after attaching", async () => {
-    const data = (
-      await TestBus.deserialize({ str: "Foo" })
-    ).getOrThrow() as io.BusOutputType<typeof TestBus>;
+  it("validates through Prelude's hasEquals() after attaching", () => {
+    const data = TestBus.deserialize({
+      str: "Foo",
+    }).getOrThrow() as io.BusOutputType<typeof TestBus>;
 
     const dataWithEq = io.addEquality(
       data,

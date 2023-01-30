@@ -20,12 +20,12 @@ export default <I, O>(innerBus: Bus<I, O>) => {
   const name = `Optional(${innerBus.name})`;
   return Bus.create<I | null, Option<O>>(
     name,
-    async (input) => {
+    (input) => {
       if (input === null) {
         return IOAccept(Option.none());
       }
 
-      return (await innerBus.deserialize(input)).bimap(
+      return innerBus.deserialize(input).bimap(
         (branches) =>
           IOReject({
             condition: name,
@@ -33,12 +33,12 @@ export default <I, O>(innerBus: Bus<I, O>) => {
             branches: branches,
           }).getLeft(),
         (inner) => Option.of(inner as O)
-      ) as IOResult<Option<O>>;
+      );
     },
-    async (input) => {
+    (input) => {
       return input.isNone()
         ? IOAccept(null)
-        : ((await innerBus.serialize(input.get())).mapLeft((branches) =>
+        : (innerBus.serialize(input.get()).mapLeft((branches) =>
             IOReject({
               condition: name,
               value: input,

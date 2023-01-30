@@ -18,11 +18,11 @@ import { IOAccept, IOReject } from "../utils";
 export default <I, O>(innerBus: Bus<I, O>) => {
   const name = `Vector(${innerBus.name})`;
 
-  const deserialize = async (input: I[]) => {
+  const deserialize = (input: I[]) => {
     if (input.length === 0) IOAccept(Vector.empty());
 
-    const deserializedInners = Vector.ofIterable(
-      await Promise.all(input.map(innerBus.deserialize))
+    const deserializedInners = Vector.ofIterable(input).map(
+      innerBus.deserialize
     );
 
     const hasLeft = deserializedInners.anyMatch((deserializedInner) =>
@@ -53,12 +53,10 @@ export default <I, O>(innerBus: Bus<I, O>) => {
     });
   };
 
-  const serialize = async (input: Vector<O>) => {
+  const serialize = (input: Vector<O>) => {
     if (input.isEmpty()) return IOAccept([]);
 
-    const deserializedInners = Vector.ofIterable(
-      await Promise.all(input.map(innerBus.serialize))
-    );
+    const deserializedInners = Vector.ofIterable(input.map(innerBus.serialize));
 
     const hasLeft = deserializedInners.anyMatch((deserializedInner) =>
       deserializedInner.isLeft()

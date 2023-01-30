@@ -28,14 +28,8 @@ export type IORight<O> = Right<IOErrors, O>;
 /** A shorthand return type for transformer functions */
 export type IOResult<O = unknown> = IOLeft | IORight<O>;
 
-/** A promisified return type for transformer functions */
-export type IOPromise<O> = Promise<IOResult<O>>;
-
-/** A (syncronous) transformer function, only used in initial declarations */
-export type IOTransformer<I, O> = (input: I) => IOResult<O>;
-
 /** A transformer function */
-export type IOAsyncTransformer<I, O> = (input: I) => IOPromise<O>;
+export type IOTransformer<I, O> = (input: I) => IOResult<O>;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /** Infers the input type of bus <B> */

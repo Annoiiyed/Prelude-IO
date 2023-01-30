@@ -17,7 +17,7 @@ describe("io.humanizeErrors", () => {
     kittens: io.Vector(Cat),
   });
 
-  it("returns a string of more readable errors", async () => {
+  it("returns a string of more readable errors", () => {
     const input: BusInputType<typeof Litter> = {
       birthplace: false, // They're hiding that they were born on the Moon
       mother: {
@@ -46,7 +46,7 @@ describe("io.humanizeErrors", () => {
       ],
     };
 
-    const fullErrors = (await Litter.deserialize(input)).getLeftOrThrow();
+    const fullErrors = Litter.deserialize(input).getLeftOrThrow();
 
     assert.equal(
       io.humanizeErrors(fullErrors),

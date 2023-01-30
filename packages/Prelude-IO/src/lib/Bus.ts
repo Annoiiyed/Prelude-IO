@@ -1,38 +1,39 @@
 import { Option, Predicate } from "prelude-ts";
-import { IOTransformer, IOAsyncTransformer, ComplexFields } from "./types";
+import { IOTransformer, ComplexFields } from "./types";
 import { IOReject, mergeNames } from "./utils";
 
 const chainTransformers =
   <T1, T2, T3>(
     name: string,
-    a: IOAsyncTransformer<T1, T2>,
-    b: IOAsyncTransformer<T2, T3>
-  ): IOAsyncTransformer<T1, T3> =>
-  (input: T1) =>
-    a(input).then((intermediate) =>
-      intermediate.isLeft()
-        ? IOReject({
-            condition: name,
-            value: input,
-            branches: intermediate.getLeft(),
-          })
-        : b(intermediate.get())
-    );
+    a: IOTransformer<T1, T2>,
+    b: IOTransformer<T2, T3>
+  ): IOTransformer<T1, T3> =>
+  (input: T1) => {
+    const intermediate = a(input);
+
+    return intermediate.isLeft()
+      ? IOReject({
+          condition: name,
+          value: input,
+          branches: intermediate.getLeft(),
+        })
+      : b(intermediate.get());
+  };
 
 const elseTransformers =
   <IA, OA, IB, OB>(
     name: string,
-    a: IOAsyncTransformer<IA, OA>,
-    b: IOAsyncTransformer<IB, OB>
+    a: IOTransformer<IA, OA>,
+    b: IOTransformer<IB, OB>
   ) =>
-  async (input: IA | IB) => {
-    const us = await a(input as IA);
+  (input: IA | IB) => {
+    const us = a(input as IA);
 
     if (us.isRight()) {
       return us;
     }
 
-    const them = await b(input as IB);
+    const them = b(input as IB);
 
     if (them.isRight()) {
       return them;
@@ -51,10 +52,7 @@ const elseTransformers =
  * Busses are executed in parallel, so the order of the errors is not guaranteed (but should not matter).
  * When chaining busses, the deserialized value of the first bus is returned, the others are ignored. This might change in the future.
  *
- * Transformers do not need to be asyncronous on initiation for ease of use, but on Bus creation, they will
- * always be wrapped in a Promise.
- *
- * Transformers should ALWAYS resolve to a Result, never throw an error or reject. This is a philosophical choice based on
+ * Transformers should ALWAYS return an IOResult, never throw an error. This is a philosophical choice based on
  * functional programming paradigms. Result objects allow functions to explicitly return errors, and the caller can decide
  * what to do with them. Throwing errors is a side effect, and should be avoided.
  *
@@ -87,10 +85,10 @@ export default class Bus<I = unknown, O = unknown> {
     public readonly name: string,
     /** An optional [Predicate](http://emmanueltouzery.github.io/prelude.ts/latest/apidoc/files/predicate.html) exectuted on the output of the bus */
     public readonly predicate: Option<Predicate<O>>,
-    /** A async deserialization function */
-    public readonly deserialize: IOAsyncTransformer<I, O>,
-    /** A async serialization function */
-    public readonly serialize: IOAsyncTransformer<O, I>,
+    /** A deserialization function */
+    public readonly deserialize: IOTransformer<I, O>,
+    /** A serialization function */
+    public readonly serialize: IOTransformer<O, I>,
     /** Contains the inner bus if this bus is a wrapper around other busses */
     public readonly inner: Bus | [Bus, Bus] | ComplexFields = null
   ) {
@@ -98,39 +96,39 @@ export default class Bus<I = unknown, O = unknown> {
   }
 
   /**
-   * Creates a new bus with the given name and deserializer. Wraps the deserializer in an async function.
+   * Creates a new bus with the given name and deserializer.
    *
    * @param <I> - The input type for the new bus
    * @param <O> - The output type for the new bus
    * @param name - Name of the bus
-   * @param deserialize - deserialize function for this bus. Will be turned into a Promise.
+   * @param deserialize - deserialize function for this bus
    */
   static create<I, O>(
     name: string,
-    deserialize: IOTransformer<I, O> | IOAsyncTransformer<I, O>,
-    serialize: IOTransformer<O, I> | IOAsyncTransformer<O, I>,
+    deserialize: IOTransformer<I, O>,
+    serialize: IOTransformer<O, I>,
     inner: Bus["inner"] = null
   ): Bus<I, O> {
     const fallbackRejection = (input: unknown, e: unknown) =>
       IOReject({
         condition: name,
         value: input,
-        message: `Unexpected error: ${e}\n Busses should never throw errors, but instead return a Result!`,
+        message: `Unexpected error: ${e}\n Busses should never throw errors, but instead return an IOResult!`,
       });
 
     return new Bus(
       name,
       Option.none(),
-      async (input: I) => {
+      (input: I) => {
         try {
-          return await deserialize(input);
+          return deserialize(input);
         } catch (e) {
           return fallbackRejection(input, e);
         }
       },
-      async (input: O) => {
+      (input: O) => {
         try {
-          return await serialize(input);
+          return serialize(input);
         } catch (e) {
           return fallbackRejection(input, e);
         }
@@ -213,7 +211,7 @@ export default class Bus<I = unknown, O = unknown> {
   public if(name: string, predicate: Predicate<O>): Bus<I, O> {
     const newBusName = `${name}(${this.name})`;
 
-    const newserialize = async (input: O) => {
+    const newserialize = (input: O) => {
       if (!predicate(input)) {
         return IOReject({
           condition: newBusName,
@@ -228,8 +226,8 @@ export default class Bus<I = unknown, O = unknown> {
       return this.serialize(input);
     };
 
-    const newDeserialize = async (input: I) => {
-      const deserialized = await this.deserialize(input);
+    const newDeserialize = (input: I) => {
+      const deserialized = this.deserialize(input);
 
       if (deserialized.isLeft()) {
         return deserialized;

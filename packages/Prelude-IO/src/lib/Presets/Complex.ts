@@ -74,7 +74,7 @@ const Complex = <I extends ComplexFields>(
   type Input = ComplexInput<typeof innerBusses>;
   type Output = ComplexOutput<typeof innerBusses>;
 
-  const deserialize = async (input: Input) => {
+  const deserialize = (input: Input) => {
     if (typeof input !== "object" || input === null) {
       return IOReject({
         condition: name,
@@ -82,11 +82,9 @@ const Complex = <I extends ComplexFields>(
       });
     }
 
-    const valueBusPairs = toValueBusPairs(innerBusses, input);
-
-    const processedInners = await Promise.all(
-      valueBusPairs.map(deserializeInput)
-    ).then(Vector.ofIterable);
+    const processedInners = Vector.ofIterable(
+      toValueBusPairs(innerBusses, input).map(deserializeInput)
+    );
 
     const map = reformMap(innerBusses, processedInners);
 
@@ -97,7 +95,7 @@ const Complex = <I extends ComplexFields>(
     ) as IOResult<Output>;
   };
 
-  const serialize = async (input: Output) => {
+  const serialize = (input: Output) => {
     if (typeof input !== "object" || input === null) {
       return IOReject({
         condition: name,
@@ -105,11 +103,9 @@ const Complex = <I extends ComplexFields>(
       });
     }
 
-    const valueBusPairs = toValueBusPairs(innerBusses, input);
-
-    const processedInners = await Promise.all(
-      valueBusPairs.map(serializeInput)
-    ).then(Vector.ofIterable);
+    const processedInners = Vector.ofIterable(
+      toValueBusPairs(innerBusses, input).map(serializeInput)
+    );
 
     const map = reformMap(innerBusses, processedInners);
 

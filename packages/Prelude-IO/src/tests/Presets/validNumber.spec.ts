@@ -3,11 +3,11 @@ import * as io from "../../lib";
 import { IOReject } from "../../lib";
 
 describe("io.validNumber", () => {
-  it("deserializes/serializes values, returning IOLeft on invalid numbers", async () => {
-    assert.deepEqual(await io.validNumber.deserialize(0), io.IOAccept(0));
+  it("deserializes/serializes values, returning IOLeft on invalid numbers", () => {
+    assert.deepEqual(io.validNumber.deserialize(0), io.IOAccept(0));
 
     assert.deepEqual(
-      await io.validNumber.deserialize("foo bar"),
+      io.validNumber.deserialize("foo bar"),
       io.IOReject({
         condition: "isNumber(any)",
         value: "foo bar",
@@ -19,7 +19,7 @@ describe("io.validNumber", () => {
     );
 
     assert.deepEqual(
-      await io.validNumber.deserialize(NaN),
+      io.validNumber.deserialize(NaN),
       io.IOReject({
         condition: "isValidNumber(isNumber(any))",
         value: NaN,
@@ -31,7 +31,7 @@ describe("io.validNumber", () => {
     );
 
     assert.deepEqual(
-      await io.validNumber.deserialize(Infinity),
+      io.validNumber.deserialize(Infinity),
       io.IOReject({
         condition: "isValidNumber(isNumber(any))",
         value: Infinity,

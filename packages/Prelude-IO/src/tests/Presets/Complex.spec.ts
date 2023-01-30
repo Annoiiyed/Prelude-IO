@@ -14,7 +14,7 @@ describe("io.Complex()", () => {
     nest: TestBus,
   });
 
-  it("Deserializes complex objects", async () => {
+  it("Deserializes complex objects", () => {
     const input: BusInputType<typeof TestBus> = {
       str: "Foo",
     };
@@ -23,58 +23,54 @@ describe("io.Complex()", () => {
       str: "Foo",
     };
 
-    assert.deepEqual(await TestBus.deserialize(input), io.IOAccept(output));
+    assert.deepEqual(TestBus.deserialize(input), io.IOAccept(output));
   });
 
-  it("Works with freshly deserialized JSON", async () => {
+  it("Works with freshly deserialized JSON", () => {
     const json = JSON.parse('{"str": "Foo"}');
 
     assert.deepEqual(
-      await TestBus.deserialize(json),
+      TestBus.deserialize(json),
       io.IOAccept({
         str: "Foo",
       })
     );
   });
 
-  it("Deep rejects mismatching fields", async () => {
-    assert.ok((await TestBus.deserialize({ str: 4 })).isLeft());
+  it("Deep rejects mismatching fields", () => {
+    assert.ok(TestBus.deserialize({ str: 4 }).isLeft());
 
-    assert.ok((await TestBus.serialize({ str: 4 })).isLeft());
+    assert.ok(TestBus.serialize({ str: 4 }).isLeft());
 
     assert.ok(
-      (
-        await NestedBus.deserialize({
-          num: [3, 5, 7],
-          nest: { str: 4 },
-        })
-      ).isLeft()
+      NestedBus.deserialize({
+        num: [3, 5, 7],
+        nest: { str: 4 },
+      }).isLeft()
     );
 
     assert.ok(
-      (
-        await NestedBus.serialize({
-          // @ts-expect-error Testing invalid input
-          num: Vector.of(3, "5", 7),
-          nest: { str: 4 },
-        })
-      ).isLeft()
+      NestedBus.serialize({
+        // @ts-expect-error Testing invalid input
+        num: Vector.of(3, "5", 7),
+        nest: { str: 4 },
+      }).isLeft()
     );
 
-    assert.ok((await TestBus.deserialize(undefined)).isLeft());
-    assert.ok((await TestBus.deserialize(false)).isLeft());
-    assert.ok((await TestBus.deserialize(null)).isLeft());
-    assert.ok((await TestBus.deserialize({})).isLeft());
+    assert.ok(TestBus.deserialize(undefined).isLeft());
+    assert.ok(TestBus.deserialize(false).isLeft());
+    assert.ok(TestBus.deserialize(null).isLeft());
+    assert.ok(TestBus.deserialize({}).isLeft());
 
-    assert.ok((await TestBus.serialize(undefined)).isLeft());
-    assert.ok((await TestBus.serialize(false)).isLeft());
-    assert.ok((await TestBus.serialize(null)).isLeft());
-    assert.ok((await TestBus.serialize({})).isLeft());
+    assert.ok(TestBus.serialize(undefined).isLeft());
+    assert.ok(TestBus.serialize(false).isLeft());
+    assert.ok(TestBus.serialize(null).isLeft());
+    assert.ok(TestBus.serialize({}).isLeft());
   });
 
-  it("Deserializes complex objects when nested", async () => {
+  it("Deserializes complex objects when nested", () => {
     assert.deepEqual(
-      await NestedBus.deserialize({
+      NestedBus.deserialize({
         num: [3, 5, 7],
         nest: { str: "Foo" },
       }),
@@ -87,9 +83,9 @@ describe("io.Complex()", () => {
     );
   });
 
-  it("Serializes complex objects", async () => {
+  it("Serializes complex objects", () => {
     assert.deepEqual(
-      await NestedBus.serialize({
+      NestedBus.serialize({
         num: Vector.of(3, 5, 7),
         nest: {
           str: "Foo",
