@@ -9,7 +9,8 @@ Interop with Prelude-ts is a key feature of this library, but not strictly requi
 
 ## Core library
 
-Prelude-IO's base unit is the `Bus<I, O>` class, which provides basic functionality and abstractions around creating reversible data pipelines, as well as a few basic types to represent most data formats.
+Prelude-IO's base unit is the `Bus<I, O>` class, which provides basic functionality and abstractions around creating reversible data pipelines.
+The core library also includes a few basic types to represent most data formats, found [here](https://annoiiyed.github.io/Prelude-IO/modules.html#presets) under Presets.
 
 Examples can be found [here][examples]. Alternatively, here's an overview of some basic functionality: 
 
@@ -46,7 +47,6 @@ fetch("http://example.com/hotels.json")
       // Built-in debugger
       console.error(io.humanizeErrors(hotel.getLeft()))
     } else {
-      // Serialising
       LocalStorage.setItem("hotel", hotel.get())
     }
   });
