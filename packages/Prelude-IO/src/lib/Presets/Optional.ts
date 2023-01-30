@@ -11,17 +11,17 @@ import { IOAccept, IOReject } from "../utils";
  * [[include:optional_preset_example.ts]]
  * ```
  *
- * @param <I> Inner bus' input. This is widened to `I | null` in the newly created bus.
+ * @param <I> Inner bus' input. This is widened to `I | null | undefined` in the newly created bus.
  * @param <O> Inner bus' output. This is transformed to `Option<O>` in the newly created bus.
  *
  * @group Presets
  */
 export default <I, O>(innerBus: Bus<I, O>) => {
   const name = `Optional(${innerBus.name})`;
-  return Bus.create<I | null, Option<O>>(
+  return Bus.create<I | null | undefined, Option<O>>(
     name,
     (input) => {
-      if (input === null) {
+      if (input === null || input === undefined) {
         return IOAccept(Option.none());
       }
 

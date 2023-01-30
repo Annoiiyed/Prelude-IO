@@ -17,6 +17,13 @@ describe("io.Optional()", () => {
     );
   });
 
+  it("Deserializes undefined", () => {
+    assert.deepEqual(
+      io.Optional(io.number).deserialize(undefined),
+      io.IOAccept(Option.none())
+    );
+  });
+
   it("Serializes values", () => {
     assert.deepEqual(
       io.Optional(io.number).serialize(Option.of(1)),
