@@ -1,6 +1,6 @@
 import assert from "assert";
 import * as io from "../lib";
-import { BusInputType } from "../lib";
+import { BusInputType, humanizeErrors } from "../lib";
 
 describe("io.humanizeErrors", () => {
   const Cat = io.Complex("Cat", {
@@ -46,25 +46,66 @@ describe("io.humanizeErrors", () => {
       ],
     };
 
-    const fullErrors = Litter.deserialize(input).getLeftOrThrow();
+    const errors = io.humanizeErrors(
+      Litter.deserialize(input).getLeftOrThrow()
+    );
 
     assert.equal(
-      io.humanizeErrors(fullErrors),
+      errors,
       // eslint-disable-next-line prettier/prettier
 `Litter
   ├─ birthplace
   │   └─ isString(any)
-  │       └─ isString rejected the value \`false\`
+  │       └─ isString rejected \`false\`
   └─ kittens
       └─ Vector(Cat)
           └─ [2]
               └─ Cat
                   ├─ isAdopted
                   │   └─ isBoolean(any)
-                  │       └─ isBoolean rejected the value \`bit too soon\`
+                  │       └─ isBoolean rejected \`bit too soon\`
                   └─ age
                       └─ isPositive(isValidNumber(isNumber(any)))
-                          └─ isPositive rejected the value \`-1\``
+                          └─ isPositive rejected \`-1\``
+    );
+  });
+
+  it("humanizes errors with messages spanning multiple lines", () => {
+    const RejectingBus = io.Bus.create<string, string>(
+      "RejectingBus",
+      (input: string) =>
+        io.IOReject({
+          condition: "RejectingBus",
+          value: input,
+          message:
+            "This is an error\nthat spans multiple lines\nand should still look pretty",
+        }),
+      (input: string) =>
+        io.IOReject({
+          condition: "RejectingBus",
+          value: input,
+          message:
+            "This is an error\nthat spans multiple lines\nand should still look pretty",
+        })
+    );
+
+    const NestedBus = io.Complex("NestedBus", {
+      rejecting: RejectingBus,
+    });
+
+    const errors = NestedBus.deserialize({
+      rejecting: "test",
+    }).getLeftOrThrow();
+
+    assert.equal(
+      humanizeErrors(errors),
+      // eslint-disable-next-line prettier/prettier
+`NestedBus
+  └─ rejecting
+      └─ RejectingBus rejected \`test\`
+          │  This is an error
+          │  that spans multiple lines
+          └─ and should still look pretty`
     );
   });
 });

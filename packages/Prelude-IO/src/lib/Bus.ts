@@ -109,11 +109,11 @@ export default class Bus<I = unknown, O = unknown> {
     serialize: IOTransformer<O, I>,
     inner: Bus["inner"] = null
   ): Bus<I, O> {
-    const fallbackRejection = (input: unknown, e: unknown) =>
+    const fallbackRejection = (input: unknown, e: Error) =>
       IOReject({
         condition: name,
         value: input,
-        message: `Unexpected error: ${e}\n Busses should never throw errors, but instead return an IOResult!`,
+        message: `Unexpected error: ${e}\n---\n Busses should never throw errors, but instead return an IOResult!\n---\n${e.stack}`,
       });
 
     return new Bus(

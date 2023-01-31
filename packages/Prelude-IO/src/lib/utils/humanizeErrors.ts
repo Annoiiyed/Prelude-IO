@@ -1,16 +1,28 @@
 import { IOErrors } from "../types";
 
+const ERROR_MARKER = "%%%ERROR_MARKER%%%";
+
 const isLineError = (line: string): boolean =>
-  !["├", "│", "└"].includes(line.trim().charAt(0));
+  !["├", "│", "└"].includes(line.trim().charAt(0)) &&
+  line.includes(ERROR_MARKER);
 
 const makeLines = (errors: IOErrors): string[] =>
   errors
     .toArray()
-    .map(({ value, condition, branches }) =>
+    .map(({ value, condition, branches, message }) =>
       branches === undefined || branches.isEmpty()
-        ? [`${condition} rejected the value \`${value}\``]
+        ? [
+            ERROR_MARKER + `${condition} rejected \`${value}\``,
+            ...(!message
+              ? []
+              : message.split("\n").map((msgLine, msgLineIndex, msgLines) => {
+                  const isLast = msgLines.length - 1 === msgLineIndex;
+
+                  return isLast ? `  └─ ${msgLine}` : `  │  ${msgLine}`;
+                })),
+          ]
         : [
-            condition,
+            ERROR_MARKER + condition,
             ...makeLines(branches).map((line, lineIndex, lines) => {
               const isError = isLineError(line);
               const hasNext = lines.some(
@@ -30,4 +42,5 @@ const makeLines = (errors: IOErrors): string[] =>
 /**
  * Converts a list of IOErrors into a human-readable string.
  */
-export default (errors: IOErrors): string => makeLines(errors).join("\n");
+export default (errors: IOErrors): string =>
+  makeLines(errors).join("\n").replaceAll(ERROR_MARKER, "");
