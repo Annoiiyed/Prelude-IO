@@ -1,10 +1,88 @@
 {
-  "name": "root",
+  "name": "prelude-io",
   "private": true,
+  "scripts": {
+    "prepare": "husky install",
+    "test": "lerna run test",
+    "lint": "eslint ./packages  --max-warnings 0",
+    "docs:update": "typedoc --validation --treatWarningsAsErrors"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Annoiiyed/Prelude-IO.git"
+  },
+  "keywords": [
+    "functional-programming",
+    "io",
+    "preludets"
+  ],
+  "author": "Noï van Mondfrans <noivanmondfrans@gmail.com>",
+  "funding": {
+    "type": "kofi",
+    "url": "https://ko-fi.com/annoiiyed"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Annoiiyed/Prelude-IO/issues"
+  },
+  "homepage": "https://github.com/Annoiiyed/Prelude-IO#readme",
   "workspaces": [
     "packages/*"
   ],
+  "prettier": {
+    "overrides": [
+      {
+        "files": "./examples",
+        "options": {
+          "semi": true
+        }
+      }
+    ]
+  },
+  "eslintConfig": {
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint",
+      "prettier"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": "error"
+    }
+  },
+  "nyc": {
+    "all": true,
+    "check-coverage": true,
+    "include": [
+      "packages/*/lib/**/*.ts"
+    ],
+    "reporter": "lcov",
+    "statements": 100,
+    "lines": 100
+  },
+  "dependencies": {
+    "prelude-ts": "~1.0.6"
+  },
   "devDependencies": {
-    "lerna": "^6.4.1"
+    "@types/mocha": "^10.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.3",
+    "lerna": "^6.4.1",
+    "mocha-junit-reporter": "^2.2.0",
+    "mocha-multi": "^1.1.7",
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
+    "prettier": "^2.8.3",
+    "ts-node": "^10.9.1",
+    "typedoc": "^0.23.24",
+    "typescript": "~4.9.4"
   }
 }

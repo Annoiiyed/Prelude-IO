@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo Checking documentation
+npm run docs:update && echo "Documentation passed, adding to commit"
+git add ./docs
+
+echo Linting
+npm run lint && echo "Linting passed"
+
+echo Running tests
+npm test

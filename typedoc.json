@@ -1,0 +1,14 @@
+{
+  "entryPoints": [
+    "packages/core/lib/index.ts",
+    "packages/fetch/lib/index.ts"
+  ],
+  "excludeInternal": true,
+  "categorizeByGroup": true,
+  "searchInComments": true,
+  "validation": {
+    "invalidLink": true,
+    "notDocumented": false
+  },
+  "includes": "./examples"
+}

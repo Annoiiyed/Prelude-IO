@@ -1,8 +1,0 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-./node_modules/.bin/typedoc --validation --treatWarningsAsErrors && echo "Documentation passed"
-git add ./docs
-npm test -- --coverage
-./node_modules/.bin/eslint --max-warnings 0 ./src && echo "Linting passed"
-./node_modules/.bin/tsc --noEmit && echo "Compilation passed"
