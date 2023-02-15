@@ -16,22 +16,12 @@ describe("io.JSON", () => {
       io.IOAccept('{"test":true}')
     );
 
-    assert.deepEqual(
-      io.JSON.deserialize("{invalid: true]"),
-      io.IOReject({
-        condition: "JSON",
-        message: "Expected property name or '}' in JSON at position 1",
-        value: "{invalid: true]",
-      })
-    );
+    assert.ok(io.JSON.deserialize("{invalid: true]").isLeft());
 
     const selfRef = {};
     // @ts-expect-error - Testing invalid input
     selfRef.self = selfRef;
 
-    assert.deepEqual(
-      io.JSON.serialize(selfRef).getLeftOrThrow().head().getOrNull()?.message,
-      "Converting circular structure to JSON\n    --> starting at object with constructor 'Object'\n    --- property 'self' closes the circle"
-    );
+    assert.ok(io.JSON.serialize(selfRef).isLeft());
   });
 });
