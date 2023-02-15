@@ -27,6 +27,7 @@ workflows:
       - eslint
       - typedoc
       - node/test:
+          override-ci-command: npm ci && npx lerna run build --scope=@prelude-io/core
           matrix:
             parameters:
               version:
