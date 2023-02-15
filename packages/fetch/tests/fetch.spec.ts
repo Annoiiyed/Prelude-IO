@@ -80,7 +80,6 @@ describe("ioFetch()", () => {
     const fetcher = ioFetch(CatFactsResponse);
 
     const result = await fetcher(URL);
-    console.log(result);
 
     assert.ok(result.isLeft());
     assert.equal(
