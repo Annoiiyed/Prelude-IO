@@ -1,7 +1,7 @@
 import assert from "assert";
 import * as io from "../../lib";
 
-describe("io.number", () => {
+describe("io.boolean", () => {
   it("deserializes/serializes values, returning IOLeft on non-booleans", () => {
     assert.deepEqual(io.boolean.deserialize(true), io.IOAccept(true));
 

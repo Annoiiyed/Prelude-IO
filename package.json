@@ -5,7 +5,7 @@
     "prepare": "husky install",
     "test": "lerna run test",
     "lint": "eslint ./packages  --max-warnings 0",
-    "docs:update": "typedoc --validation --treatWarningsAsErrors"
+    "docs:update": "typedoc --treatWarningsAsErrors"
   },
   "repository": {
     "type": "git",
@@ -13,8 +13,7 @@
   },
   "keywords": [
     "functional-programming",
-    "io",
-    "preludets"
+    "io"
   ],
   "author": "Noï van Mondfrans <noivanmondfrans@gmail.com>",
   "funding": {
@@ -41,7 +40,14 @@
   },
   "eslintConfig": {
     "root": true,
+    "ignorePatterns": [
+      "node_modules",
+      "dist"
+    ],
     "parser": "@typescript-eslint/parser",
+    "env": {
+      "node": true
+    },
     "plugins": [
       "@typescript-eslint",
       "prettier"
@@ -60,7 +66,7 @@
     "all": true,
     "check-coverage": true,
     "include": [
-      "packages/*/lib/**/*.ts"
+      "lib/**/*.ts"
     ],
     "reporter": "lcov",
     "statements": 100,
@@ -76,13 +82,14 @@
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.3",
     "lerna": "^6.4.1",
+    "mocha": "^10.2.0",
     "mocha-junit-reporter": "^2.2.0",
     "mocha-multi": "^1.1.7",
-    "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "prettier": "^2.8.3",
     "ts-node": "^10.9.1",
     "typedoc": "^0.23.24",
+    "typedoc-plugin-resolve-crossmodule-references": "^0.3.3",
     "typescript": "~4.9.4"
   }
 }

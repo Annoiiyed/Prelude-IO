@@ -1,0 +1,21 @@
+{
+    "factCount": 4,
+    "facts": [
+        {
+            "fact": "The technical term for a cat's hairball is a “bezoar.”",
+            "length": 54
+        },
+        {
+            "fact": "A group of cats is called a “clowder.”",
+            "length": 38
+        },
+        {
+            "fact": "A cat can't climb head first down a tree because every claw on a cat's paw points the same way. To get down from a tree, a cat must back down.",
+            "length": 142
+        },
+        {
+            "fact": "Cats make about 100 different sounds. Dogs make only about 10.",
+            "length": 62
+        }
+    ]
+}

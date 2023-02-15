@@ -1,11 +1,14 @@
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "module": "es2022",
     "baseUrl": ".",
     "paths": {
       "@prelude-io/core": [
-        "../src/lib"
+        "../packages/core/lib"
+      ],
+      "@prelude-io/fetch": [
+        "../packages/fetch/lib"
       ]
     }
   }

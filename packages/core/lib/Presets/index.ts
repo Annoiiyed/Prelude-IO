@@ -9,3 +9,4 @@ export { default as Partial } from "./Partial";
 export { default as any } from "./any";
 export { default as boolean } from "./boolean";
 export { default as date } from "./date";
+export { default as JSON } from "./json";

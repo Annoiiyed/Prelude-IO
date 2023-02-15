@@ -1,14 +1,16 @@
 {
+  "entryPointStrategy": "packages",
   "entryPoints": [
-    "packages/core/lib/index.ts",
-    "packages/fetch/lib/index.ts"
+    "packages/core",
+    "packages/fetch"
   ],
   "excludeInternal": true,
   "categorizeByGroup": true,
   "searchInComments": true,
   "validation": {
     "invalidLink": true,
-    "notDocumented": false
+    "notDocumented": true,
+    "notExported": false
   },
   "includes": "./examples"
 }

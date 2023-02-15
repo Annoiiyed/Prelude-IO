@@ -1,14 +1,15 @@
 {
     "compilerOptions": {
         "lib": [
-            "ES2021"
+            "ES2021",
+            "DOM"
         ],
         "module": "commonjs",
-        "target": "es6",
+        "target": "es2017",
         "declaration": true,
         "noImplicitAny": true,
         "esModuleInterop": true,
-        "outDir": "./dist",
+        "resolveJsonModule": true
     },
     "exclude": [
         "node_modules",

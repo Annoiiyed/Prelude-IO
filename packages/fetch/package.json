@@ -4,11 +4,53 @@
   "description": "Type-save runtime fetching utility for Prelude-IO",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "license": "ISC",
   "files": [
     "./dist"
   ],
   "scripts": {
-    "test": "nyc mocha --coverage"
+    "test": "nyc mocha",
+    "prepack": "npm run build",
+    "build": "rm -rf ./dist && tsc"
+  },
+  "gitHead": "86e55b4c6b3b92b00de5092cb87aeadfd2542f64",
+  "nyc": {
+    "all": true,
+    "check-coverage": true,
+    "include": [
+      "lib/**/*.ts"
+    ],
+    "reporter": "lcov",
+    "statements": 100,
+    "lines": 100
+  },
+  "funding": {
+    "type": "kofi",
+    "url": "https://ko-fi.com/annoiiyed"
+  },
+  "keywords": [
+    "functional-programming",
+    "io"
+  ],
+  "author": "Noï van Mondfrans <noivanmondfrans@gmail.com>",
+  "license": "ISC",
+  "homepage": "https://github.com/Annoiiyed/Prelude-IO#readme",
+  "bugs": {
+    "url": "https://github.com/Annoiiyed/Prelude-IO/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Annoiiyed/Prelude-IO.git"
+  },
+  "dependencies": {
+    "@prelude-io/core": "*",
+    "isomorphic-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/isomorphic-fetch": "^0.0.36",
+    "@types/node-fetch": "^2.6.2",
+    "fetch-mock": "^9.11.0"
+  },
+  "typedoc": {
+    "entryPoint": "lib/index.ts"
   }
 }

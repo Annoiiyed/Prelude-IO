@@ -1,7 +1,7 @@
 # Prelude-IO
 
 [![npm version](https://badge.fury.io/js/@prelude-io%2Fcore.svg)](https://badge.fury.io/js/@prelude-io%2Fcore)
-[![documentation](https://img.shields.io/badge/Documentation-blue)](https://annoiiyed.github.io/Prelude-IO/modules.html)
+[![documentation](https://img.shields.io/badge/Documentation-blue)](https://annoiiyed.github.io/Prelude-IO/modules/_Prelude_IO_Core.html)
 
 This library aims to provide easy to use run- and compiletime type-safety combined with the benefits of immutability through [Prelude-ts].
 
@@ -67,13 +67,16 @@ npm install --save @prelude-io/core prelude-ts
 - IO returns `Either` objects rather than throw exceptions
 - Functions can be `chain`ed or turned into a `union`
 
+## Additional libraries
+
+- [**Prelude-IO/Fetch:**](https://github.com/Annoiiyed/Prelude-IO/tree/main/packages/fetch) A wrapper around `fetch` for runtime type-checking
+
 ## Roadmap
 - Add extra commonly used types
-- **`@prelude-io/fetch`**: A library providing automatic parsing of HTTP requests and responses
 - **`@prelude-io/test`**: A set of functions to run basic tests on your data types
 
 ## Inspirations
-- [Prelude-ts]\: Provides functional programming concepts in an accessible manner. Though a similar name, this project is not directly affiliated with prelude-ts or its authors.
+- [Prelude-ts]: Provides functional programming concepts in an accessible manner. Though a similar name, this project is not directly affiliated with prelude-ts or its authors.
 - [io-ts](https://github.com/gcanti/io-ts): Runtime type checking, encoding and decoding, based on `fp-ts`.
 
 [Prelude-ts]: https://github.com/emmanueltouzery/prelude-ts

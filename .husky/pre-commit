@@ -1,6 +1,9 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+echo Syncing package files
+node ./scripts/copyPackageFields.mjs
+
 echo Checking documentation
 npm run docs:update && echo "Documentation passed, adding to commit"
 git add ./docs
