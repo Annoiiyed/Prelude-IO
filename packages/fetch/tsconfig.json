@@ -1,16 +1,13 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "lib": [
-            "ES2021",
-            "DOM"
-        ],
+        "outDir": "./dist",
+        "baseUrl": "./",
         "paths": {
             "@prelude-io/core": [
                 "../core/lib/index.ts"
             ]
-        },
-        "outDir": "./dist"
+        }
     },
     "include": [
         "./lib"

@@ -10,7 +10,7 @@
   "scripts": {
     "test": "nyc mocha",
     "prepack": "npm run build",
-    "build": "rm -rf ./dist && tsc"
+    "build": "rm -rf ./dist && tsc --project tsconfig.build.json"
   },
   "gitHead": "86e55b4c6b3b92b00de5092cb87aeadfd2542f64",
   "nyc": {
