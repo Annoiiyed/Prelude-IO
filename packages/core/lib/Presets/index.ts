@@ -10,3 +10,4 @@ export { default as any } from "./any";
 export { default as boolean } from "./boolean";
 export { default as date } from "./date";
 export { default as JSON } from "./json";
+export { default as Literal } from "./Literal";
