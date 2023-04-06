@@ -19,7 +19,7 @@ export default <I, O>(innerBus: Bus<I, O>) => {
   const name = `Vector(${innerBus.name})`;
 
   const deserialize = (input: I[]) => {
-    if (input.length === 0) IOAccept(Vector.empty());
+    if (input.length === 0) return IOAccept(Vector.empty<O>());
 
     const deserializedInners = Vector.ofIterable(input).map(
       innerBus.deserialize
