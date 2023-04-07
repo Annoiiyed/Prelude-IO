@@ -11,3 +11,5 @@ export { default as boolean } from "./boolean";
 export { default as date } from "./date";
 export { default as JSON } from "./json";
 export { default as Literal } from "./Literal";
+export { default as objectEntries } from "./objectEntries";
+export { default as HashMap } from "./HashMap";
