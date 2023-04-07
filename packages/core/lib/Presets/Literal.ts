@@ -8,6 +8,8 @@ import any_ from "./any";
  * @param value The value to match against
  *
  * @returns A bus that only accepts the given value
+ *
+ * @group Presets
  */
 const Literal = <T extends WithEquality>(value: T) => {
   const predicate = Predicate.of(
