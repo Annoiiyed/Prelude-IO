@@ -3,21 +3,43 @@ import { HashMap } from "prelude-ts";
 import * as io from "../../lib";
 
 describe("io.HashMap", () => {
+  // Just to make the output differ from the input
+  const valueBus = io.Bus.create(
+    "double",
+    (n: number) => io.IOAccept(n * 2),
+    (n: number) => io.IOAccept(n / 2)
+  );
+
+  const bus = io.HashMap(io.string, valueBus);
+
   it("deserialises an iterable of pairs into a hashmap", () => {
-    const bus = io.HashMap(io.string, io.number);
     const testInput = [
-      ["foo", 2],
-      ["bar", 4],
-      ["baz", 6],
+      ["foo", 1],
+      ["bar", 2],
+      ["baz", 3],
     ] as [string, number][];
 
     const result = bus.deserialize(testInput);
 
     assert.ok(result.isRight());
-    assert.equal(
-      result.get().hashCode(),
-      HashMap.ofIterable(testInput).hashCode()
-    );
+    assert.deepEqual(result.get().toObjectDictionary(String), {
+      foo: 2,
+      bar: 4,
+      baz: 6,
+    });
+  });
+
+  it("serialises a hashmap into an array of pairs", () => {
+    const testInput = HashMap.of(["foo", 2], ["bar", 4], ["baz", 6]);
+
+    const result = bus.serialize(testInput);
+
+    assert.ok(result.isRight());
+    assert.deepEqual(result.get(), [
+      ["foo", 1],
+      ["bar", 2],
+      ["baz", 3],
+    ]);
   });
 
   it("deserialises union types", () => {
@@ -40,6 +62,7 @@ describe("io.HashMap", () => {
       [1, "5"],
     ] as [number, number][];
 
+    // @ts-expect-error - Testing invalid input
     const result = bus.deserialize(testInput);
 
     assert.ok(result.isLeft());
@@ -60,7 +83,9 @@ describe("io.HashMap", () => {
   });
 
   it("is chainable with io.objectEntries", () => {
-    const bus = io.objectEntries.chain(io.HashMap(io.string, io.number));
+    const bus = (io.objectEntries as io.ObjectEntriesBus<number>).chain(
+      io.HashMap(io.string, io.number)
+    );
 
     const testInputObj = {
       foo: 3,

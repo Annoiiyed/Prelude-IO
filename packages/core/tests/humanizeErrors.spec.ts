@@ -19,6 +19,7 @@ describe("io.humanizeErrors", () => {
 
   it("returns a string of more readable errors", () => {
     const input: BusInputType<typeof Litter> = {
+      // @ts-expect-error - Testing invalid input
       birthplace: false, // They're hiding that they were born on the Moon
       mother: {
         name: "Mittens",
@@ -41,6 +42,7 @@ describe("io.humanizeErrors", () => {
           name: "Sif",
           // This kitten is a work in progress
           age: -1,
+          // @ts-expect-error - Testing invalid input
           isAdopted: "bit too soon",
         },
       ],

@@ -17,4 +17,4 @@ import any from "./any";
 export default any.if(
   "isNumber",
   Predicate.of((n) => typeof n === "number")
-) as Bus<unknown, number>;
+) as Bus<number, number>;

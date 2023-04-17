@@ -33,6 +33,7 @@ describe("io.Vector()", () => {
 
   it("Does not deserialize mismatching inners", () => {
     assert.deepEqual(
+      // @ts-expect-error Testing invalid input
       io.Vector(io.number).deserialize([1, 2, "3"]),
       io.IOReject({
         condition: "Vector(isNumber(any))",

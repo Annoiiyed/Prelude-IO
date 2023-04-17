@@ -64,3 +64,9 @@ export type ComplexBus<F extends ComplexFields> = Bus<
 export type PartialFields<F extends ComplexFields, K extends keyof F> = {
   [Field in K]: Bus<ComplexInput<F>[Field], F[Field]>;
 };
+
+/** A type used in combindation with ObjectEntry bus to provide type hints */
+export type ObjectEntriesBus<V = unknown> = Bus<
+  { [key: string]: V },
+  [string, V][]
+>;

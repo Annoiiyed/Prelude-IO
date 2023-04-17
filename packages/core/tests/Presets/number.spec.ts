@@ -8,6 +8,7 @@ describe("io.number", () => {
     assert.deepEqual(io.number.serialize(123), io.IOAccept(123));
 
     assert.deepEqual(
+      // @ts-expect-error - Testing invalid input
       io.number.deserialize("foo bar baz"),
       io.IOReject({
         condition: "isNumber(any)",
@@ -37,6 +38,9 @@ describe("io.number", () => {
     );
 
     assert.deepEqual(
+      // Not all versions of TS call this an error, so ignore instead of expect
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - Testing invalid input
       io.number.deserialize(null),
       io.IOReject({
         condition: "isNumber(any)",

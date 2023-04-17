@@ -7,6 +7,7 @@ describe("io.validNumber", () => {
     assert.deepEqual(io.validNumber.deserialize(0), io.IOAccept(0));
 
     assert.deepEqual(
+      // @ts-expect-error Testing invalid input
       io.validNumber.deserialize("foo bar"),
       io.IOReject({
         condition: "isNumber(any)",

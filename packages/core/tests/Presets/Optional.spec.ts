@@ -40,6 +40,7 @@ describe("io.Optional()", () => {
 
   it("Does not deserialize mismatching inners", () => {
     assert.deepEqual(
+      // @ts-expect-error - Testing invalid input
       io.Optional(io.number).deserialize("3"),
       io.IOReject({
         condition: "Optional(isNumber(any))",
@@ -62,7 +63,9 @@ describe("io.Optional()", () => {
 
   it("Does not serialize mismatching inners", () => {
     assert.deepEqual(
-      // @ts-expect-error Testing invalid input
+      // Not all versions of TS call this an error, so ignore instead of expect
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - Testing invalid input
       io.Optional(io.number).serialize(Option.of("3")),
       io.IOReject({
         condition: "Optional(isNumber(any))",

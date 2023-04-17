@@ -14,6 +14,7 @@ describe("io.string", () => {
     );
 
     assert.deepEqual(
+      // @ts-expect-error - Testing invalid input
       io.string.deserialize(123),
       io.IOReject({
         condition: "isString(any)",
@@ -43,6 +44,9 @@ describe("io.string", () => {
     );
 
     assert.deepEqual(
+      // Not all versions of TS call this an error, so ignore instead of expect
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - Testing invalid input
       io.string.deserialize(null),
       io.IOReject({
         condition: "isString(any)",

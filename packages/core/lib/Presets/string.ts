@@ -15,4 +15,4 @@ import any from "./any";
 export default any.if(
   "isString",
   Predicate.of((n) => typeof n === "string")
-) as Bus<unknown, string>;
+) as Bus<string, string>;

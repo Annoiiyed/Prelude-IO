@@ -15,4 +15,4 @@ import any from "./any";
 export default any.if(
   "isBoolean",
   Predicate.of((n) => typeof n === "boolean")
-) as Bus<unknown, boolean>;
+) as Bus<boolean, boolean>;

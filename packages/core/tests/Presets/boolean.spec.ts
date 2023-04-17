@@ -8,6 +8,7 @@ describe("io.boolean", () => {
     assert.deepEqual(io.boolean.serialize(true), io.IOAccept(true));
 
     assert.deepEqual(
+      // @ts-expect-error - Testing invalid input
       io.boolean.deserialize("true"),
       io.IOReject({
         condition: "isBoolean(any)",

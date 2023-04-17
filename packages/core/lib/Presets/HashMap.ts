@@ -41,13 +41,11 @@ const intoResult = <K extends WithEquality, V>(
 ) =>
   errors.isEmpty()
     ? IOAccept(
-        HashMap.ofIterable(
-          entries.map(
-            (entry) =>
-              entry.getOrThrow(
-                "Should not be able to be Left due to foldLeft above here"
-              ) as [K, V]
-          )
+        entries.map(
+          (entry) =>
+            entry.getOrThrow(
+              "Should not be able to be Left due to foldLeft above here"
+            ) as [K, V]
         )
       )
     : IOReject({
@@ -85,29 +83,32 @@ const serialisationPipe = <KI, VI, KO extends WithEquality, VO>(
  *
  * @group Presets
  */
-const hashMapBusCreator = <VI, KI, VO, KO extends WithEquality>(
+const hashMapBusCreator = <
+  VI,
+  KI extends WithEquality,
+  VO,
+  KO extends WithEquality
+>(
   keyInnerBus: Bus<KI, KO>,
   valueInnerBus: Bus<VI, VO>,
   name = `HashMap(${keyInnerBus.name}, ${valueInnerBus.name})`
 ) =>
   Bus.create(
     name,
-    (input: [KI, VI][]) =>
+    (input: [KI, VI][]): IOResult<HashMap<KO, VO>> =>
       serialisationPipe(
         input,
         name,
         keyInnerBus.deserialize,
         valueInnerBus.deserialize
-      ),
-    // @ts-expect-error - Serialiser handles impossible keys already, even if the type is unknown
-    (input: HashMap<KO, VO>) =>
+      ).map((v: Vector<[KO, VO]>) => HashMap.ofIterable(v)),
+    (input: HashMap<KO, VO>): IOResult<[KI, VI][]> =>
       serialisationPipe(
         input.toArray(),
         name,
-        // @ts-expect-error - Serialiser handles impossible keys already, even if the type is unknown
         keyInnerBus.serialize,
         valueInnerBus.serialize
-      )
+      ).map((v: Vector<[KI, VI]>) => v.toArray())
   );
 
 export default hashMapBusCreator;
