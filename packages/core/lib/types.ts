@@ -62,7 +62,7 @@ export type ComplexBus<F extends ComplexFields> = Bus<
 
 /** A derrived object of fields based on a Complex type */
 export type PartialFields<F extends ComplexFields, K extends keyof F> = {
-  [Field in K]: Bus<ComplexInput<F>[Field], F[Field]>;
+  [Field in K]: Bus<ComplexInput<F>[Field], ComplexOutput<F>[Field]>;
 };
 
 /** A type used in combindation with ObjectEntry bus to provide type hints */
