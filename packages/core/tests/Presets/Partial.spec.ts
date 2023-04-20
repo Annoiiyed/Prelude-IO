@@ -19,4 +19,22 @@ describe("io.Partial", () => {
       { str: "Foo" }
     );
   });
+
+  it("https://github.com/Annoiiyed/Prelude-IO/issues/5 - Partial bus returns the inner bus rather than the output's type", () => {
+    const TestBus = io.Complex("TestBus", {
+      str: io.string,
+      num: io.number,
+    });
+
+    const PartialTestBus = io.Partial(TestBus, ["str"]);
+
+    const deserialized = PartialTestBus.deserialize({ str: "Foo" });
+
+    assert.ok(deserialized.isRight());
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const testTypeOutput: string = deserialized.get().str;
+
+    assert.ok(typeof testTypeOutput === "string");
+  });
 });
