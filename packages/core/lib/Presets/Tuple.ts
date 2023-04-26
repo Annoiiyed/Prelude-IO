@@ -27,6 +27,20 @@ const makeTransformer =
     });
   };
 
+/**
+ * A bus factory that (de-)serializes a tuple of busses.
+ *
+ * @example
+ * ```typescript
+ * [[include:tuple_preset_example.ts]]
+ * ```
+ *
+ * @param <Inners> The inner busses' types
+ * @param inners The inner busses, passed as a plain array/tuple
+ * @param name The new bus' name
+ *
+ * @group Presets
+ */
 function Tuple<const Inners extends readonly Bus[]>(
   inners: Inners,
   name = `Tuple(${inners.map((b) => b.name).join(", ")})`

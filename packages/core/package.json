@@ -40,8 +40,5 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Annoiiyed/Prelude-IO.git"
-  },
-  "typedoc": {
-    "entryPoint": "lib/index.ts"
   }
 }
