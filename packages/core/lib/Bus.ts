@@ -90,7 +90,7 @@ export default class Bus<I = unknown, O = unknown> {
     /** A serialization function */
     public readonly serialize: IOTransformer<O, I>,
     /** Contains the inner bus if this bus is a wrapper around other busses */
-    public readonly inner: Bus | [Bus, Bus] | ComplexFields = null
+    public readonly inner: Bus | ComplexFields | readonly Bus[] = null
   ) {
     Object.freeze(this);
   }

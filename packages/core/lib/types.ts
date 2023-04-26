@@ -70,3 +70,27 @@ export type ObjectEntriesBus<V = unknown> = Bus<
   { [key: string]: V },
   [string, V][]
 >;
+
+/** A type used to dynamically extract the input types of a TupleBus */
+export type TupleBusInputs<Busses extends readonly Bus[]> =
+  Busses extends readonly [
+    Bus<infer I, unknown>,
+    ...infer Tail extends readonly Bus[]
+  ]
+    ? [I, ...TupleBusInputs<Tail>]
+    : [];
+
+/** A type used to dynamically extract the ouput types of a TupleBus */
+export type TupleBusOutputs<Busses extends readonly Bus[]> =
+  Busses extends readonly [
+    Bus<unknown, infer O>,
+    ...infer Tail extends readonly Bus[]
+  ]
+    ? [O, ...TupleBusOutputs<Tail>]
+    : [];
+
+/** A Tuple bus, with dynamic, consistent typings */
+export type TupleBus<Busses extends readonly Bus[]> = Bus<
+  TupleBusInputs<Busses>,
+  TupleBusOutputs<Busses>
+>;

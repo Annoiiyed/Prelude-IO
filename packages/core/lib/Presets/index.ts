@@ -13,3 +13,4 @@ export { default as JSON } from "./json";
 export { default as Literal } from "./Literal";
 export { default as objectEntries } from "./objectEntries";
 export { default as HashMap } from "./HashMap";
+export { default as Tuple } from "./Tuple";

@@ -13,7 +13,6 @@
     },
     "exclude": [
         "node_modules",
-        "examples",
-        "**/*.spec.ts"
+        "examples"
     ]
 }
