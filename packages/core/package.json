@@ -2,10 +2,10 @@
   "name": "@prelude-io/core",
   "version": "1.5.2",
   "description": "Type-save runtime IO library based on PreludeTS",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/lib/index.js",
+  "types": "dist/lib/index.d.ts",
   "files": [
-    "./dist"
+    "./dist/lib"
   ],
   "scripts": {
     "test": "nyc mocha",
