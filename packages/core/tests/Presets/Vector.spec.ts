@@ -89,4 +89,12 @@ describe("io.Vector()", () => {
       })
     );
   });
+
+  it("https://github.com/Annoiiyed/Prelude-IO/issues/3 - Fetch utility returns Right in inaproperiate situations", async () => {
+    // @ts-expect-error - Testing invalid input
+    assert.ok(io.Vector(io.string).deserialize({}).isLeft());
+
+    // @ts-expect-error - Testing invalid input
+    assert.ok(io.Vector(io.string).serialize({}).isLeft());
+  });
 });

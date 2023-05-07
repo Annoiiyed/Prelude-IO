@@ -97,20 +97,4 @@ describe("ioFetch()", () => {
 
     assert.deepEqual(result, Either.right("Hello world"));
   });
-
-  it("https://github.com/Annoiiyed/Prelude-IO/issues/3 - Fetch utility returns Right in inaproperiate situations", async () => {
-    fetchMock.once(URL, JSON.stringify({ not: "The right response" }));
-
-    const ResponseItem = io.Complex("Response", {
-      foo: io.string,
-    });
-
-    const Response = io.Vector(ResponseItem);
-
-    const fetcher = ioFetch(Response);
-
-    const result = await fetcher(URL);
-
-    assert.ok(result.isLeft());
-  });
 });
