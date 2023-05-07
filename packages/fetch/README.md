@@ -1,7 +1,7 @@
 # @Prelude-IO/Fetch
 
 [![npm version](https://badge.fury.io/js/@prelude-io%2Fcore.svg)](https://badge.fury.io/js/@prelude-io%2Fcore)
-[![documentation](https://img.shields.io/badge/Documentation-blue)](https://annoiiyed.github.io/Prelude-IO/modules/_Prelude_IO_Fetch.html)
+[![documentation](https://img.shields.io/badge/Documentation-blue)](https://annoiiyed.github.io/Prelude-IO/modules/_prelude_io_fetch.html)
 
 Prelude-IO aims to provide easy to use run- and compiletime type-safety combined with the benefits of immutability through [Prelude-ts]. This library adds a simple wrapper around `fetch`, to type-check your request and response bodies.
 
@@ -38,7 +38,7 @@ console.log(result); // => IORight containing `{ factCount: 4, facts: [...] }`
 
 ### Documentation
 
-You can read typedoc documentation [here](https://annoiiyed.github.io/Prelude-IO/modules/_Prelude_IO_Fetch.html)
+You can read typedoc documentation [here](https://annoiiyed.github.io/Prelude-IO/modules/_prelude_io_fetch.html)
 
 ### Installation
 
