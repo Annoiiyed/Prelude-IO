@@ -42,7 +42,7 @@
     "url": "git+https://github.com/Annoiiyed/Prelude-IO.git"
   },
   "dependencies": {
-    "@prelude-io/core": "^1.6.0",
+    "@prelude-io/core": "*",
     "isomorphic-fetch": "^3.0.0"
   },
   "devDependencies": {

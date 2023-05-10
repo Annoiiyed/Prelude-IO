@@ -74,7 +74,8 @@ const elseTransformers =
  * @param <I> - The input type of the bus
  * @param <O> - The output type of the bus
  */
-export default class Bus<I = unknown, O = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default class Bus<I = any, O = any> {
   /**
    * Constructor cannot be called directly. Instead, {@link Bus.create} should be used.
    *
