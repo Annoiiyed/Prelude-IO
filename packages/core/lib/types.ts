@@ -88,9 +88,3 @@ export type TupleBusOutputs<Busses extends readonly Bus[]> =
   ]
     ? [O, ...TupleBusOutputs<Tail>]
     : [];
-
-/** A Tuple bus, with dynamic, consistent typings */
-export type TupleBus<Busses extends readonly Bus[]> = Bus<
-  TupleBusInputs<Busses>,
-  TupleBusOutputs<Busses>
->;
