@@ -16,9 +16,11 @@ import { IOAccept, IOReject } from "../utils";
  *
  * @group Presets
  */
-export default <I, O>(innerBus: Bus<I, O>) => {
-  const name = `Optional(${innerBus.name})`;
-  return Bus.create<I | null | undefined, Option<O>>(
+export default <I, O>(
+  innerBus: Bus<I, O>,
+  name = `Optional(${innerBus.name})`
+) =>
+  Bus.create<I | null | undefined, Option<O>>(
     name,
     (input) => {
       if (input === null || input === undefined) {
@@ -48,4 +50,3 @@ export default <I, O>(innerBus: Bus<I, O>) => {
     },
     innerBus
   );
-};

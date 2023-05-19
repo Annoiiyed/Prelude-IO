@@ -15,9 +15,10 @@ import { IOAccept, IOReject } from "../utils";
  *
  * @group Presets
  */
-export default <I, O>(innerBus: Bus<I, O>) => {
-  const name = `Vector(${innerBus.name})`;
-
+export default <I, O>(
+  innerBus: Bus<I, O>,
+  name = `Vector(${innerBus.name})`
+) => {
   const deserialize = (input: I[]) => {
     if (
       typeof input === "undefined" ||
