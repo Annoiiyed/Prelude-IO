@@ -1,7 +1,7 @@
 # Prelude-IO
 
 [![npm version](https://badge.fury.io/js/@prelude-io%2Fcore.svg)](https://badge.fury.io/js/@prelude-io%2Fcore)
-[![documentation](https://img.shields.io/badge/Documentation-blue)](https://annoiiyed.github.io/Prelude-IO/modules/_prelude_io_core.html)
+[![documentation](https://img.shields.io/badge/Documentation-blue)](https://annoiiyed.github.io/Prelude-IO/modules)
 
 This library aims to provide easy to use run- and compiletime type-safety combined with the benefits of immutability through [Prelude-ts].
 
