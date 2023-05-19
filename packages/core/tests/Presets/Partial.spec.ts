@@ -37,4 +37,15 @@ describe("io.Partial", () => {
 
     assert.ok(typeof testTypeOutput === "string");
   });
+
+  it("https://github.com/Annoiiyed/Prelude-IO/issues/6 - Works when fields are passed as an array externally", () => {
+    const TestBus = io.Complex("TestBus", {
+      str: io.string,
+      num: io.number,
+    });
+
+    const fields = ["num"] as const;
+
+    io.Partial(TestBus, fields);
+  });
 });

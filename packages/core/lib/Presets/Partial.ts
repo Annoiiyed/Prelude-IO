@@ -18,7 +18,7 @@ import Complex from "./Complex";
  */
 const Partial = <CF extends ComplexFields, F extends keyof CF>(
   full: ComplexBus<CF>,
-  fields: F[],
+  fields: readonly F[],
   name = `Partial(${full.name}[${fields.join(", ")}])`
 ): ComplexBus<PartialFields<CF, F>> => {
   return Complex(
