@@ -97,4 +97,26 @@ describe("io.Vector()", () => {
     // @ts-expect-error - Testing invalid input
     assert.ok(io.Vector(io.string).serialize({}).isLeft());
   });
+
+  it("https://github.com/Annoiiyed/Prelude-IO/issues/4 - Vector throws an error when passed undefined", () => {
+    const bus = io.Vector(io.string);
+
+    const deRes = bus.deserialize(undefined);
+    const serRes = bus.serialize(undefined);
+
+    assert.deepEqual(
+      deRes,
+      io.IOReject({
+        condition: "Vector(isString(any))",
+        value: undefined,
+      })
+    );
+    assert.deepEqual(
+      serRes,
+      io.IOReject({
+        condition: "Vector(isString(any))",
+        value: undefined,
+      })
+    );
+  });
 });

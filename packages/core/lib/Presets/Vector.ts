@@ -66,6 +66,12 @@ export default <I, O>(
   };
 
   const serialize = (input: Vector<O>) => {
+    if (!(input instanceof Vector))
+      return IOReject({
+        condition: name,
+        value: input,
+      });
+
     if (input.isEmpty()) return IOAccept([]);
 
     const deserializedInners = Vector.ofIterable(input.map(innerBus.serialize));
