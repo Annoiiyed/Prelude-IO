@@ -16,10 +16,10 @@ export type ResponseHandler = (resp: Response) => Promise<io.IOResult>;
  *
  * @param options.body The type of the request body
  */
-export type WrappedFetch<O, I> = (
+export type WrappedFetch<ResultBody, RequestBody> = (
   input: RequestInfo | URL,
-  options?: Omit<RequestInit, "body"> & { body?: I }
-) => Promise<io.IOResult<O>>;
+  options?: Omit<RequestInit, "body"> & { body?: RequestBody }
+) => Promise<io.IOResult<ResultBody>>;
 
 /**
  *
@@ -101,3 +101,16 @@ export function ioFetch<O, I, B extends BodyInit>(
       );
   };
 }
+
+/**
+ * A utility type to infer the IOResult returned by a fetcher
+ *
+ * @param <Fetcher> The fetcher whose ResponseBody type you want.
+ */
+export type ResponseResult<Fetcher> = Fetcher extends WrappedFetch<
+  infer ResponseBody,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any
+>
+  ? io.IOResult<ResponseBody>
+  : never;
