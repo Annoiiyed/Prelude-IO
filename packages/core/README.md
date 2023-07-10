@@ -1,7 +1,7 @@
 # Prelude-IO
 
 [![npm version](https://badge.fury.io/js/@prelude-io%2Fcore.svg)](https://badge.fury.io/js/@prelude-io%2Fcore)
-[![documentation](https://img.shields.io/badge/Documentation-blue)](https://annoiiyed.github.io/Prelude-IO/modules)
+[![documentation](https://img.shields.io/badge/Documentation-blue)](https://annoiiyed.github.io/Prelude-IO/)
 
 This library aims to provide easy to use run- and compiletime type-safety combined with the benefits of immutability through [Prelude-ts].
 
@@ -10,7 +10,7 @@ Interop with Prelude-ts is a key feature of this library, but not strictly requi
 ## Core library
 
 Prelude-IO's base unit is the `Bus<I, O>` class, which provides basic functionality and abstractions around creating reversible data pipelines.
-The core library also includes a few basic types to represent most data formats, found [here](https://annoiiyed.github.io/Prelude-IO/modules/_prelude_io_core.html#Presets) under Presets.
+The core library also includes a few basic types to represent most data formats, found [here](https://annoiiyed.github.io/Prelude-IO/modules/_prelude_io_core.html) under Presets.
 
 Examples can be found [here][examples]. Alternatively, here's an overview of some basic functionality: 
 
