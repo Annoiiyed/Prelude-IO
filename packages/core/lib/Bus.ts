@@ -144,6 +144,10 @@ export default class Bus<I = any, O = any> {
    *
    * On failure, returns the errors of both busses.
    *
+   * ```typescript
+   * [[include:bus_union_example.ts]]
+   * ```
+   *
    * @param <IB> - The other bus' input
    * @param <OB> - The other bus' output
    * @param name - The name of the new bus
@@ -170,6 +174,10 @@ export default class Bus<I = any, O = any> {
    *
    * The predicates of the chained busses are preserved, but the newly created bus does not
    * have a predicate of its own.
+   *
+   * ```typescript
+   * [[include:bus_chaining_example.ts]]
+   * ```
    *
    * @param <OB> - The other bus' output
    * @param name - The name of the new bus

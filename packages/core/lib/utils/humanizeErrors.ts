@@ -40,7 +40,11 @@ const makeLines = (errors: IOErrors): string[] =>
     .flatMap((lines) => lines);
 
 /**
- * Converts a list of IOErrors into a human-readable string.
+ * Converts a vector of IOErrors into a human-readable string.
+ *
+ * ```typescript
+ * [[include:humanReadableError_example.ts]]
+ * ```
  */
 export default (errors: IOErrors): string =>
   makeLines(errors).join("\n").replaceAll(ERROR_MARKER, "");
