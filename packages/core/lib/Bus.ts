@@ -2,6 +2,8 @@ import { Option, Predicate } from "prelude-ts";
 import { IOTransformer, ComplexFields } from "./types";
 import { IOReject, mergeNames } from "./utils";
 
+const TYPE_MARKER = Symbol("%%TYPE_MARKER");
+
 const chainTransformers =
   <T1, T2, T3>(
     name: string,
@@ -23,26 +25,34 @@ const chainTransformers =
 const elseTransformers =
   <IA, OA, IB, OB>(
     name: string,
-    a: IOTransformer<IA, OA>,
-    b: IOTransformer<IB, OB>
+    [a, b]: [IOTransformer<IA, OA>, IOTransformer<IB, OB>],
+    [aIsUnion, bIsUnion]: [boolean, boolean]
   ) =>
   (input: IA | IB) => {
-    const us = a(input as IA);
+    const resultA = a(input as IA);
 
-    if (us.isRight()) {
-      return us;
+    if (resultA.isRight()) {
+      return resultA;
     }
 
-    const them = b(input as IB);
+    const resultB = b(input as IB);
 
-    if (them.isRight()) {
-      return them;
+    if (resultB.isRight()) {
+      return resultB;
     }
+
+    const branchesA = aIsUnion
+      ? resultA.getLeft().flatMap((x) => x.branches)
+      : resultA.getLeft();
+
+    const branchesB = bIsUnion
+      ? resultB.getLeft().flatMap((x) => x.branches)
+      : resultB.getLeft();
 
     return IOReject({
       condition: name,
       value: input,
-      branches: us.getLeft().appendAll(them.getLeft()),
+      branches: branchesA.appendAll(branchesB),
     });
   };
 
@@ -91,7 +101,12 @@ export default class Bus<I = any, O = any> {
     /** A serialization function */
     public readonly serialize: IOTransformer<O, I>,
     /** Contains the inner bus if this bus is a wrapper around other busses */
-    public readonly inner: Bus | ComplexFields | readonly Bus[] = null
+    public readonly inner:
+      | Bus
+      | ComplexFields
+      | readonly Bus[]
+      | { [TYPE_MARKER]: "UNION"; busses: readonly Bus[] }
+      | { [TYPE_MARKER]: "CHAIN"; busses: readonly Bus[] } = null
   ) {
     Object.freeze(this);
   }
@@ -159,12 +174,32 @@ export default class Bus<I = any, O = any> {
     other: Bus<IB, OB>,
     name: string = mergeNames([this.name, other.name], "|")
   ): Bus<I | IB, O | OB> {
+    const thisIsUnion =
+      typeof this.inner === "object" &&
+      this.inner !== null &&
+      TYPE_MARKER in this.inner &&
+      this.inner[TYPE_MARKER] === "UNION";
+
+    const otherIsUnion =
+      typeof other.inner === "object" &&
+      this.inner !== null &&
+      TYPE_MARKER in other.inner &&
+      other.inner[TYPE_MARKER] === "UNION";
+
     return new Bus<I | IB, O | OB>(
       name,
       Option.none(),
-      elseTransformers(name, this.deserialize, other.deserialize),
-      elseTransformers(name, this.serialize, other.serialize),
-      [this, other]
+      elseTransformers(
+        name,
+        [this.deserialize, other.deserialize],
+        [thisIsUnion, otherIsUnion]
+      ),
+      elseTransformers(
+        name,
+        [this.serialize, other.serialize],
+        [otherIsUnion, thisIsUnion]
+      ),
+      { [TYPE_MARKER]: "UNION", busses: [this, other] }
     );
   }
 
@@ -194,7 +229,7 @@ export default class Bus<I = any, O = any> {
       Option.none(),
       chainTransformers(name, this.deserialize, other.deserialize),
       chainTransformers(name, other.serialize, this.serialize),
-      [this, other]
+      { [TYPE_MARKER]: "CHAIN", busses: [this, other] }
     );
   }
 
