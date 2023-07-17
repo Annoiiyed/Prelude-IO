@@ -175,4 +175,23 @@ describe("io.Bus", () => {
       })
     );
   });
+
+  it("https://github.com/Annoiiyed/Prelude-IO/issues/15 - unions give properly readable errors when passed to humanizeErrors", () => {
+    const bus = io.string.else(io.string).else(io.number.else(io.boolean));
+
+    const r = bus.deserialize(null);
+
+    assert.equal(
+      io.humanizeErrors(r.getLeftOrThrow()),
+      `isString(any) | isString(any) | isNumber(any) | isBoolean(any)
+  ├─ isString(any)
+  │   └─ isString rejected \`null\`
+  ├─ isString(any)
+  │   └─ isString rejected \`null\`
+  ├─ isNumber(any)
+  │   └─ isNumber rejected \`null\`
+  └─ isBoolean(any)
+      └─ isBoolean rejected \`null\``
+    );
+  });
 });
