@@ -1,6 +1,6 @@
 {
   "name": "@prelude-io/fetch",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "Type-save runtime fetching utility for Prelude-IO",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -42,7 +42,7 @@
     "url": "git+https://github.com/Annoiiyed/Prelude-IO.git"
   },
   "dependencies": {
-    "@prelude-io/core": "^1.6.3",
+    "@prelude-io/core": "^1.6.4",
     "isomorphic-fetch": "^3.0.0"
   },
   "devDependencies": {

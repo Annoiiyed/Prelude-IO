@@ -1,6 +1,6 @@
 {
   "name": "@prelude-io/core",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "Type-save runtime IO library based on PreludeTS",
   "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
