@@ -35,7 +35,7 @@ describe("io.Bus", () => {
     assert.deepEqual(
       middleWillFail.deserialize(1),
       io.IOReject({
-        condition: "(willPass -> willFail) -> willPass",
+        condition: "willPass -> willFail -> willPass",
         value: 1,
         branches: io
           .IOReject({

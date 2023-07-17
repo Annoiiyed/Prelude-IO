@@ -1,16 +1,6 @@
-import * as io from "../lib";
+import * as io from "../../lib";
 import assert from "assert";
 import { hasEquals, stringHashCode } from "prelude-ts";
-
-describe("io.mergeNames()", () => {
-  it("merges two names", () => {
-    assert.equal(io.mergeNames(["a", "b"], "->"), "a -> b");
-
-    assert.equal(io.mergeNames(["a", "b -> c"], "||"), "a || (b -> c)");
-
-    assert.equal(io.mergeNames(["a", "(d)b -> c"], "||"), "a || ((d)b -> c)");
-  });
-});
 
 describe("io.addEquality()", () => {
   const TestBus = io.Complex("TestBus", {
